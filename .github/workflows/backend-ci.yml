@@ -1,15 +1,10 @@
 name: Backend CI
 
+# 브랜치 보호의 필수 체크가 문서만 바꾼 PR에서도 보고되도록 경로 조건 없이 항상 실행한다
 on:
   pull_request:
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend-ci.yml"
   push:
     branches: [main]
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend-ci.yml"
 
 permissions:
   contents: read
