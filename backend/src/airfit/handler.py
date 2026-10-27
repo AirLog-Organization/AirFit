@@ -15,6 +15,6 @@ def lambda_handler(event: dict, context) -> dict:
     method = event["requestContext"]["http"]["method"]
     path = event["rawPath"]
 
-    if method == "GET" and path == "/v1/health":
+    if method == "GET" and path == "/api/health":
         return _response(200, {"status": "ok"})
     return _response(404, {"error": "not_found"})
