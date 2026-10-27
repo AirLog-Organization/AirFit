@@ -1,0 +1,1 @@
+# Lambda 런타임 의존성. boto3는 Lambda Python 런타임에 기본으로 들어 있어 넣지 않는다.
