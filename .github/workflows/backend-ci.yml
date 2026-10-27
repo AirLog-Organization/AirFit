@@ -1,0 +1,58 @@
+name: Backend CI
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          # template.yaml의 Lambda 런타임과 맞춘다
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Format check
+        run: ruff format --check .
+
+      - name: Test
+        # 제안서 성공 기준: 백엔드 단위 테스트 커버리지 70% 이상
+        run: pytest --cov=airfit --cov-report=term-missing --cov-fail-under=70
+
+      - uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
+      - name: Validate SAM template
+        run: sam validate --lint
+        env:
+          AWS_DEFAULT_REGION: ap-northeast-2
