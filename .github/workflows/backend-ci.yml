@@ -28,7 +28,9 @@ jobs:
           # template.yaml의 Lambda 런타임과 맞춘다
           python-version: "3.14"
           cache: pip
-          cache-dependency-path: backend/requirements*.txt
+          cache-dependency-path: |
+            backend/requirements-dev.txt
+            backend/src/requirements.txt
 
       - name: Install dependencies
         run: pip install -r requirements-dev.txt
