@@ -23,7 +23,7 @@ defaults:
     working-directory: frontend
 
 jobs:
-  test:
+  frontend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
