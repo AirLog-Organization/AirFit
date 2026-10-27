@@ -27,7 +27,7 @@ Resources:
           Type: HttpApi
           Properties:
             ApiId: !Ref HttpApi
-            Path: /v1/health
+            Path: /api/health
             Method: GET
 
 Outputs:
