@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: >-
-  GitHub Actions가 장기 키 없이 OIDC로 AirFit 백엔드를 배포하기 위한 IAM 자원.
-  계정마다 한 번 관리자 권한으로 수동 배포한다.
+  IAM resources that let GitHub Actions deploy the AirFit backend over OIDC
+  without long-lived keys. Deploy manually once per account with admin rights.
 
 Parameters:
   GitHubRepo:
@@ -24,8 +24,8 @@ Resources:
         - 6938fd4d98bab03faadb97b34396831e3780aea1
         - 1c58a3a8518e8759bf075b76b750d4f2df264fcd
 
-  # GitHub Actions가 맡는 role. 직접 자원을 만들 권한은 없고,
-  # changeset을 올린 뒤 실제 생성은 아래 CloudFormation 실행 role에 넘긴다.
+  # Role assumed by GitHub Actions. It cannot create resources itself; it only
+  # submits changesets and hands the actual work to the CloudFormation execution role below.
   GitHubDeployRole:
     Type: AWS::IAM::Role
     Properties:
@@ -85,9 +85,9 @@ Resources:
                   StringEquals:
                     iam:PassedToService: cloudformation.amazonaws.com
 
-  # CloudFormation이 앱 스택 자원을 만들고 고칠 때 쓰는 role.
-  # 앞으로 템플릿에 붙일 DynamoDB, SSM, S3, CloudFront까지 미리 열어 두고,
-  # IAM은 앱 스택이 만드는 role 이름으로만 좁힌다.
+  # Role CloudFormation uses to create and update the app stack's resources.
+  # DynamoDB, SSM, S3, and CloudFront are opened ahead of time for upcoming template changes,
+  # while IAM is limited to role names the app stack creates.
   CloudFormationExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -126,7 +126,7 @@ Resources:
                 Resource:
                   - !Sub arn:${AWS::Partition}:s3:::${AppStackName}-*
                   - !Sub arn:${AWS::Partition}:s3:::${AppStackName}-*/*
-              # Lambda 코드 zip을 SAM 배포 bucket에서 읽는다
+              # Read the Lambda code zip from the SAM deployment bucket
               - Effect: Allow
                 Action: s3:GetObject
                 Resource: !Sub arn:${AWS::Partition}:s3:::aws-sam-cli-managed-default-samclisourcebucket-*/*
@@ -142,7 +142,6 @@ Resources:
                   - iam:TagRole
                   - iam:UntagRole
                   - iam:UpdateAssumeRolePolicy
-                  - iam:AttachRolePolicy
                   - iam:DetachRolePolicy
                   - iam:PutRolePolicy
                   - iam:GetRolePolicy
@@ -150,11 +149,17 @@ Resources:
                   - iam:ListRolePolicies
                   - iam:ListAttachedRolePolicies
                 Resource: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${AppStackName}-*
+              - Effect: Allow
+                Action: iam:AttachRolePolicy
+                Resource: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${AppStackName}-*
+                Condition:
+                  ArnEquals:
+                    iam:PolicyARN: !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 
 Outputs:
   DeployRoleArn:
-    Description: GitHub 저장소 변수 AWS_DEPLOY_ROLE_ARN에 넣는 값
+    Description: Value for the GitHub repository variable AWS_DEPLOY_ROLE_ARN
     Value: !GetAtt GitHubDeployRole.Arn
   CloudFormationExecutionRoleArn:
-    Description: GitHub 저장소 변수 AWS_CFN_EXEC_ROLE_ARN에 넣는 값
+    Description: Value for the GitHub repository variable AWS_CFN_EXEC_ROLE_ARN
     Value: !GetAtt CloudFormationExecutionRole.Arn
