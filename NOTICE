@@ -1,0 +1,70 @@
+AirFit
+Copyright (c) 2026 AirLog
+
+This project is licensed under the MIT License (see LICENSE).
+It uses the third-party open source software listed below. Each component
+remains under its own license. Dependencies are pinned in
+frontend/package.json, frontend/package-lock.json, backend/src/requirements.txt
+and backend/requirements-dev.txt. Update this file when a dependency is added
+or removed.
+
+------------------------------------------------------------------------
+1. Included in the deployed frontend bundle
+------------------------------------------------------------------------
+
+react        MIT    https://github.com/facebook/react
+react-dom    MIT    https://github.com/facebook/react
+scheduler    MIT    https://github.com/facebook/react (dependency of react-dom)
+tailwindcss  MIT    https://github.com/tailwindlabs/tailwindcss (generated CSS)
+
+------------------------------------------------------------------------
+2. Build, test and deployment tools (not distributed)
+------------------------------------------------------------------------
+
+Frontend
+vite                        MIT  https://github.com/vitejs/vite
+@vitejs/plugin-react        MIT  https://github.com/vitejs/vite-plugin-react
+@tailwindcss/vite           MIT  https://github.com/tailwindlabs/tailwindcss
+vitest                      MIT  https://github.com/vitest-dev/vitest
+jsdom                       MIT  https://github.com/jsdom/jsdom
+@testing-library/react      MIT  https://github.com/testing-library/react-testing-library
+@testing-library/jest-dom   MIT  https://github.com/testing-library/jest-dom
+eslint, @eslint/js          MIT  https://github.com/eslint/eslint
+eslint-plugin-react-hooks   MIT  https://github.com/facebook/react
+eslint-plugin-react-refresh MIT  https://github.com/ArnaudBarre/eslint-plugin-react-refresh
+globals                     MIT  https://github.com/sindresorhus/globals
+
+Backend
+pytest      MIT         https://github.com/pytest-dev/pytest
+pytest-cov  MIT         https://github.com/pytest-dev/pytest-cov
+ruff        MIT         https://github.com/astral-sh/ruff
+boto3       Apache-2.0  https://github.com/boto/boto3
+            (provided by the AWS Lambda Python runtime at run time;
+            installed locally only for development and tests)
+AWS SAM CLI Apache-2.0  https://github.com/aws/aws-sam-cli
+
+------------------------------------------------------------------------
+3. NOTICE files of Apache-2.0 components
+------------------------------------------------------------------------
+
+The Apache License 2.0 text is in licenses/Apache-2.0.txt.
+The NOTICE files of these components are reproduced below as published.
+
+--- boto3 ---
+boto3
+Copyright 2013-2017 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+--- AWS SAM CLI ---
+AWS SAM CLI
+Copyright 2018-2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+------------------------------------------------------------------------
+4. External data services (called over API, no code included)
+------------------------------------------------------------------------
+
+These are not open source software. Their terms of use and attribution
+requirements are described in README.md.
+
+- AirKorea air quality and station information, Korea Environment
+  Corporation, via data.go.kr (KOGL Type 3)
+- OpenWeather (openweathermap.org)
