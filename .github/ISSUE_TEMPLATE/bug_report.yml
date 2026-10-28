@@ -1,0 +1,55 @@
+name: 버그 신고
+description: 동작이 기대와 다를 때 알려 주세요.
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        신고 전에 같은 내용의 이슈가 이미 있는지 검색해 주세요.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 영역
+      options:
+        - frontend (화면)
+        - backend (API, 생활지수)
+        - 옷차림 규칙
+        - CI/CD, 배포
+        - 문서
+        - 잘 모르겠음
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 무슨 일이 있었나요?
+      description: 실제로 일어난 일과 기대한 동작을 함께 적어 주세요.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 재현 방법
+      placeholder: |
+        1. 지역 검색에서 '서울 종로구'를 선택
+        2. 생활지수 카드에서 ...
+        3. ...
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: 환경
+      description: 브라우저와 OS, 또는 로컬 실행이라면 Python/Node 버전
+      placeholder: Chrome 140, Windows 11
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 로그나 스크린샷
+      description: 에러 메시지, 콘솔 로그, 화면 캡처가 있으면 붙여 주세요. API 키는 지워 주세요.
