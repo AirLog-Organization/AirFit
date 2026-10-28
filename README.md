@@ -37,6 +37,7 @@ cd backend
 python3.14 -m venv .venv
 .venv/bin/pip install -r requirements-dev.txt
 .venv/bin/ruff check .
+.venv/bin/ruff format --check .
 .venv/bin/pytest
 ```
 
@@ -47,6 +48,7 @@ cd backend
 py -3.14 -m venv .venv
 .venv\Scripts\pip install -r requirements-dev.txt
 .venv\Scripts\ruff check .
+.venv\Scripts\ruff format --check .
 .venv\Scripts\pytest
 ```
 
@@ -61,7 +63,7 @@ npm run dev
 ## 배포
 
 - PR마다 GitHub Actions가 `backend`, `frontend` CI를 실행합니다. 두 체크가 통과하고 리뷰 승인 1명을 받아야 `main`에 병합할 수 있습니다.
-- `main`에 병합되면 Deploy workflow가 AWS SAM으로 백엔드(API Gateway HTTP API + Lambda)를 배포합니다. AWS 인증은 장기 키 대신 OIDC를 사용합니다.
+- `backend/` 코드가 바뀐 PR이 `main`에 병합되면 Deploy workflow가 AWS SAM으로 백엔드(API Gateway HTTP API + Lambda)를 배포합니다. AWS 인증은 장기 키 대신 OIDC를 사용합니다.
 - 프론트엔드(S3, CloudFront) 배포는 준비 중입니다.
 
 ## 데이터 출처와 이용 조건
@@ -75,7 +77,7 @@ AirFit은 아래 외부 서비스를 API로 호출만 하며, 해당 서비스�
 | 사용 API | 한국환경공단_에어코리아_대기오염정보, 한국환경공단_에어코리아_측정소정보 |
 | 이용허락범위 | 공공누리 제3유형 (출처표시, 변경금지) |
 | 호출 제한 | 개발계정 API별 일일 500건. 활용사례를 등록하면 운영계정으로 늘릴 수 있음 |
-| 출처 표기 | 화면에 "출처: 한국환경공단 에어코리아"를 표시 |
+| 출처 표기 | 화면에 "출처: 한국환경공단 에어코리아"를 표시할 예정 |
 
 측정값은 바꾸지 않고 그대로 표시하며, 백엔드에서 약 10분간 캐싱해 호출 수를 줄입니다.
 
@@ -85,7 +87,7 @@ AirFit은 아래 외부 서비스를 API로 호출만 하며, 해당 서비스�
 | --- | --- |
 | 요금제 | Free |
 | 호출 제한 | 분당 60회, 월 1,000,000회 |
-| 출처 표기 | Free 요금제는 출처 표기가 필수입니다. 화면에 "Weather data provided by OpenWeather"와 [openweathermap.org](https://openweathermap.org/) 링크를 표시 |
+| 출처 표기 | Free 요금제는 출처 표기가 필수입니다. 화면에 "Weather data provided by OpenWeather"와 [openweathermap.org](https://openweathermap.org/) 링크를 표시할 예정 |
 
 이용 조건은 바뀔 수 있으니 [공공데이터포털](https://www.data.go.kr/)과 [OpenWeather](https://openweathermap.org/price)에서 최신 내용을 확인해 주세요.
 
