@@ -17,6 +17,7 @@ react        MIT    https://github.com/facebook/react
 react-dom    MIT    https://github.com/facebook/react
 scheduler    MIT    https://github.com/facebook/react (dependency of react-dom)
 tailwindcss  MIT    https://github.com/tailwindlabs/tailwindcss (generated CSS)
+lucide-react ISC    https://github.com/lucide-icons/lucide
 
 ------------------------------------------------------------------------
 2. Build, test and deployment tools (not distributed)
@@ -30,6 +31,7 @@ vitest                      MIT  https://github.com/vitest-dev/vitest
 jsdom                       MIT  https://github.com/jsdom/jsdom
 @testing-library/react      MIT  https://github.com/testing-library/react-testing-library
 @testing-library/jest-dom   MIT  https://github.com/testing-library/jest-dom
+@testing-library/user-event MIT  https://github.com/testing-library/user-event
 eslint, @eslint/js          MIT  https://github.com/eslint/eslint
 eslint-plugin-react-hooks   MIT  https://github.com/facebook/react
 eslint-plugin-react-refresh MIT  https://github.com/ArnaudBarre/eslint-plugin-react-refresh
