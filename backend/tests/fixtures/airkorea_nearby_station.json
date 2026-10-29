@@ -1,0 +1,33 @@
+{
+  "response": {
+    "body": {
+      "totalCount": 3,
+      "items": [
+        {
+          "stationCode": "111312",
+          "tm": 1.1,
+          "addr": "서울 노원구 화랑로 429 태능입구역 8번 출구",
+          "stationName": "화랑로"
+        },
+        {
+          "stationCode": "111161",
+          "tm": 3.5,
+          "addr": "서울 성북구 삼양로2길 70 길음2동 주민센터",
+          "stationName": "성북구"
+        },
+        {
+          "stationCode": "111162",
+          "tm": 3.8,
+          "addr": "서울 성북구 돈암동 8-164번지 ",
+          "stationName": "정릉로"
+        }
+      ],
+      "pageNo": 1,
+      "numOfRows": 10
+    },
+    "header": {
+      "resultMsg": "NORMAL_CODE",
+      "resultCode": "00"
+    }
+  }
+}

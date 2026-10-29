@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "total_count": 2
+  },
+  "documents": [
+    {
+      "region_type": "B",
+      "code": "1135010200",
+      "address_name": "서울특별시 노원구 월계동",
+      "region_1depth_name": "서울특별시",
+      "region_2depth_name": "노원구",
+      "region_3depth_name": "월계동",
+      "region_4depth_name": "",
+      "x": 127.06298774298776,
+      "y": 37.61991918696384
+    },
+    {
+      "region_type": "H",
+      "code": "1135056000",
+      "address_name": "서울특별시 노원구 월계1동",
+      "region_1depth_name": "서울특별시",
+      "region_2depth_name": "노원구",
+      "region_3depth_name": "월계1동",
+      "region_4depth_name": "",
+      "x": 127.06300131117236,
+      "y": 37.61989034811612
+    }
+  ]
+}
