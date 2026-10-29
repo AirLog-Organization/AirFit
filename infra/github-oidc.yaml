@@ -6,7 +6,8 @@ Description: >-
 Parameters:
   GitHubRepo:
     Type: String
-    Default: AirLog-Organization/AirFit
+    # Immutable subject format (owner@id/repo@id) used by this repository's OIDC tokens
+    Default: AirLog-Organization@335399535/AirFit@1394618774
   DeployBranch:
     Type: String
     Default: main
