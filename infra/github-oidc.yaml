@@ -84,6 +84,20 @@ Resources:
                 Condition:
                   StringEquals:
                     iam:PassedToService: cloudformation.amazonaws.com
+              # Frontend deploy workflow: upload build output and invalidate the CDN cache
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub arn:${AWS::Partition}:s3:::${AppStackName}-frontendbucket-*
+                  - !Sub arn:${AWS::Partition}:s3:::${AppStackName}-frontendbucket-*/*
+              - Effect: Allow
+                Action:
+                  - cloudfront:CreateInvalidation
+                  - cloudfront:GetInvalidation
+                Resource: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/*
 
   # Role CloudFormation uses to create and update the app stack's resources.
   # DynamoDB, SSM, S3, and CloudFront are opened ahead of time for upcoming template changes,
