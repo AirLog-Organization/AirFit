@@ -201,3 +201,27 @@ test('a late position does not override the region the user picked', async () =>
   expect(conditionCalls).toHaveLength(1)
   expect(conditionCalls[0][0]).toBe('/api/conditions?lat=37.2636&lon=127.0286')
 })
+
+test('switches to dark mode and remembers the choice', async () => {
+  const user = userEvent.setup()
+  mockGeolocation({ latitude: 37.6199, longitude: 127.063 })
+  mockApi({ '/api/conditions': () => jsonResponse(conditions) })
+
+  render(<App />)
+  await user.click(screen.getByRole('button', { name: '어두운 화면으로 바꾸기' }))
+
+  expect(document.documentElement).toHaveClass('dark')
+  expect(localStorage.getItem('airfit.theme')).toBe('dark')
+
+  await user.click(screen.getByRole('button', { name: '밝은 화면으로 바꾸기' }))
+  expect(document.documentElement).not.toHaveClass('dark')
+})
+
+test('follows the system theme until the user picks one', () => {
+  mockGeolocation({ latitude: 37.6199, longitude: 127.063 })
+  mockApi({ '/api/conditions': () => new Promise(() => {}) })
+
+  render(<App />)
+
+  expect(localStorage.getItem('airfit.theme')).toBeNull()
+})

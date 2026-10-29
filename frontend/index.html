@@ -5,6 +5,14 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AirFit</title>
+    <script>
+      // React가 뜨기 전에 테마를 정해 흰 화면이 번쩍이지 않게 한다. 규칙은 src/lib/theme.js와 같다
+      try {
+        const saved = localStorage.getItem('airfit.theme')
+        const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
+        document.documentElement.classList.toggle('dark', dark)
+      } catch {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

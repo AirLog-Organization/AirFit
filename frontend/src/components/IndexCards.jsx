@@ -12,7 +12,7 @@ const INDICES = [
 function IndexCards({ indices }) {
   return (
     <section aria-label="생활지수">
-      <h2 className="mb-3 text-sm font-semibold text-slate-500">생활지수</h2>
+      <h2 className="mb-3 text-sm font-semibold text-slate-500 dark:text-slate-400">생활지수</h2>
       <ul className="grid grid-cols-2 gap-3">
         {INDICES.map(({ key, name, Icon }) => {
           const index = indices?.[key]
@@ -20,11 +20,11 @@ function IndexCards({ indices }) {
             <li
               key={key}
               aria-label={`${name} 지수`}
-              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+              className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm"
             >
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1.5 font-medium">
-                  <Icon aria-hidden="true" className="size-4 text-slate-500" />
+                  <Icon aria-hidden="true" className="size-4 text-slate-500 dark:text-slate-400" />
                   {name}
                 </span>
                 <span
@@ -33,7 +33,7 @@ function IndexCards({ indices }) {
                   {index?.label ?? '준비 중'}
                 </span>
               </div>
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
                 {index?.summary ?? '산출 기준을 정리하고 있어요.'}
               </p>
             </li>

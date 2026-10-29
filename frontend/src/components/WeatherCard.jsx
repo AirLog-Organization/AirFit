@@ -10,7 +10,7 @@ function WeatherCard({ weather }) {
   if (!weather) {
     return (
       <Card title="날씨">
-        <p className="text-slate-500">날씨 정보가 없어요.</p>
+        <p className="text-slate-500 dark:text-slate-400">날씨 정보가 없어요.</p>
       </Card>
     )
   }
@@ -34,13 +34,13 @@ function WeatherCard({ weather }) {
         />
         <div>
           <p className="text-4xl font-bold">{round(weather.temp)}°</p>
-          <p className="text-slate-600">{conditionLabel(weather.condition?.code)}</p>
+          <p className="text-slate-600 dark:text-slate-300">{conditionLabel(weather.condition?.code)}</p>
         </div>
       </div>
       <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-3">
         {details.map(([term, value]) => (
           <div key={term}>
-            <dt className="text-slate-500">{term}</dt>
+            <dt className="text-slate-500 dark:text-slate-400">{term}</dt>
             <dd className="font-medium">{value}</dd>
           </div>
         ))}
