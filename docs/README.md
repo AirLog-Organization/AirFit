@@ -4,3 +4,4 @@
 | --- | --- | --- |
 | `api.md` | 백엔드 API 명세 | 작성 예정 |
 | `life-indices.md` | 생활지수 산출 기준 | 작성 예정 |
+| [`outfit-rules.md`](outfit-rules.md) | 옷차림 추천 기준 | 작성 |
