@@ -57,7 +57,11 @@ test('shows weather and air cards for the current position', async () => {
   expect(within(air).getByText(/화랑로 측정소/)).toBeInTheDocument()
 
   expect(screen.getByTestId('place-name')).toHaveTextContent('서울특별시 노원구 월계1동')
-  expect(screen.getByText(/에어코리아, OpenWeatherMap/)).toBeInTheDocument()
+  expect(screen.getByText('출처: 한국환경공단 에어코리아')).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'OpenWeather' })).toHaveAttribute(
+    'href',
+    'https://openweathermap.org/',
+  )
   expect(fetchMock.mock.calls[0][0]).toBe('/api/conditions?lat=37.6199&lon=127.063')
 })
 

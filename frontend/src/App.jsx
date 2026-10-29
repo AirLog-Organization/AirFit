@@ -191,11 +191,24 @@ function App() {
             <WeatherCard weather={conditions.weather} />
             <AirCard air={conditions.air} />
             <IndexCards indices={conditions.indices} />
-            <footer className="pt-2 text-center text-xs text-slate-500">
-              데이터 출처: {conditions.meta?.sources?.join(', ')}
-            </footer>
           </>
         )}
+
+        {/* 이용 조건상 필수 출처 표기 (README의 데이터 출처와 이용 조건) */}
+        <footer className="pt-2 text-center text-xs text-slate-500">
+          <p>출처: 한국환경공단 에어코리아</p>
+          <p>
+            Weather data provided by{' '}
+            <a
+              href="https://openweathermap.org/"
+              target="_blank"
+              rel="noreferrer"
+              className="underline"
+            >
+              OpenWeather
+            </a>
+          </p>
+        </footer>
       </main>
     </div>
   )
