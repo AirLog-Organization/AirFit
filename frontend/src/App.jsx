@@ -1,11 +1,14 @@
-import { LocateFixed, MapPin, RotateCw, Search } from 'lucide-react'
+import { LocateFixed, MapPin, Moon, RotateCw, Search, Sun } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { fetchConditions } from './api'
 import AirCard from './components/AirCard'
+import HourlyCard from './components/HourlyCard'
 import IndexCards from './components/IndexCards'
+import OutfitCard from './components/OutfitCard'
 import RegionSearch from './components/RegionSearch'
 import WeatherCard from './components/WeatherCard'
 import { loadSavedRegion, saveRegion } from './lib/savedRegion'
+import { applyTheme, initialTheme, saveTheme } from './lib/theme'
 
 const GEO_OPTIONS = { timeout: 10_000, maximumAge: 10 * 60 * 1000 }
 
@@ -29,9 +32,12 @@ function App() {
   const [errorMessage, setErrorMessage] = useState('')
   const [notice, setNotice] = useState('')
   const [searchOpen, setSearchOpen] = useState(initial.status === 'need-location')
+  const [theme, setTheme] = useState(initialTheme)
   const controller = useRef(null)
   // 위치 확인 중에 사용자가 지역을 고르면 늦게 온 위치 결과가 그 선택을 덮지 않도록 요청마다 번호를 붙인다
   const positionRequest = useRef(0)
+
+  useEffect(() => applyTheme(theme), [theme])
 
   function requestConditions(target) {
     controller.current?.abort()
@@ -115,22 +121,38 @@ function App() {
     (location?.source === 'gps' ? '현재 위치' : '위치를 골라 주세요')
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
       <main className="mx-auto flex max-w-xl flex-col gap-4 p-4 sm:p-6">
         <header className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h1 className="text-2xl font-bold">AirFit</h1>
-            <p className="flex items-center gap-1 text-sm text-slate-600">
+            <p className="flex items-center gap-1 text-sm text-slate-600 dark:text-slate-300">
               <MapPin aria-hidden="true" className="size-4" />
               <span data-testid="place-name">{placeName}</span>
             </p>
           </div>
           <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const next = theme === 'dark' ? 'light' : 'dark'
+                saveTheme(next)
+                setTheme(next)
+              }}
+              aria-label={theme === 'dark' ? '밝은 화면으로 바꾸기' : '어두운 화면으로 바꾸기'}
+              className="rounded-xl border border-slate-300 bg-white p-2 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700"
+            >
+              {theme === 'dark' ? (
+                <Sun aria-hidden="true" className="size-4" />
+              ) : (
+                <Moon aria-hidden="true" className="size-4" />
+              )}
+            </button>
             {hasGeolocation() && (
               <button
                 type="button"
                 onClick={locate}
-                className="flex items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm hover:bg-slate-100"
+                className="flex items-center gap-1 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700"
               >
                 <LocateFixed aria-hidden="true" className="size-4" />
                 현재 위치
@@ -140,7 +162,7 @@ function App() {
               type="button"
               onClick={() => setSearchOpen((open) => !open)}
               aria-expanded={searchOpen}
-              className="flex items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm hover:bg-slate-100"
+              className="flex items-center gap-1 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700"
             >
               <Search aria-hidden="true" className="size-4" />
               지역 검색
@@ -148,7 +170,7 @@ function App() {
           </div>
         </header>
 
-        {notice && <p className="rounded-xl bg-sky-50 px-4 py-2 text-sm text-sky-800">{notice}</p>}
+        {notice && <p className="rounded-xl bg-sky-50 dark:bg-sky-950 px-4 py-2 text-sm text-sky-800 dark:text-sky-200">{notice}</p>}
 
         {searchOpen && (
           <RegionSearch
@@ -158,13 +180,13 @@ function App() {
         )}
 
         {(status === 'locating' || status === 'loading') && (
-          <p role="status" className="py-10 text-center text-slate-500">
+          <p role="status" className="py-10 text-center text-slate-500 dark:text-slate-400">
             {status === 'locating' ? '위치를 확인하고 있어요...' : '날씨와 대기질을 불러오고 있어요...'}
           </p>
         )}
 
         {status === 'error' && (
-          <div role="alert" className="rounded-2xl bg-rose-50 p-4 text-rose-800">
+          <div role="alert" className="rounded-2xl bg-rose-50 dark:bg-rose-950 p-4 text-rose-800 dark:text-rose-200">
             <p>{errorMessage}</p>
             {location && (
               <button
@@ -182,20 +204,22 @@ function App() {
         {status === 'ready' && conditions && (
           <>
             {conditions.warnings?.length > 0 && (
-              <ul className="rounded-xl bg-amber-50 px-4 py-2 text-sm text-amber-800">
+              <ul className="rounded-xl bg-amber-50 dark:bg-amber-950 px-4 py-2 text-sm text-amber-800 dark:text-amber-200">
                 {conditions.warnings.map((warning, i) => (
                   <li key={i}>{warning.message}</li>
                 ))}
               </ul>
             )}
             <WeatherCard weather={conditions.weather} />
+            <OutfitCard outfit={conditions.outfit} />
+            <HourlyCard hourly={conditions.hourly} isDark={theme === 'dark'} />
             <AirCard air={conditions.air} />
             <IndexCards indices={conditions.indices} />
           </>
         )}
 
         {/* 이용 조건상 필수 출처 표기 (README의 데이터 출처와 이용 조건) */}
-        <footer className="pt-2 text-center text-xs text-slate-500">
+        <footer className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400">
           <p>출처: 한국환경공단 에어코리아</p>
           <p>
             Weather data provided by{' '}

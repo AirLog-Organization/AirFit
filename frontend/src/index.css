@@ -1,1 +1,4 @@
 @import 'tailwindcss';
+
+/* 시스템 설정 대신 <html class="dark">로 다크 모드를 켠다. 사용자가 화면에서 직접 바꿀 수 있게 하기 위함 */
+@custom-variant dark (&:where(.dark, .dark *));

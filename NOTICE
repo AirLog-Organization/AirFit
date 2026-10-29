@@ -18,6 +18,9 @@ react-dom    MIT    https://github.com/facebook/react
 scheduler    MIT    https://github.com/facebook/react (dependency of react-dom)
 tailwindcss  MIT    https://github.com/tailwindlabs/tailwindcss (generated CSS)
 lucide-react ISC    https://github.com/lucide-icons/lucide
+chart.js     MIT    https://github.com/chartjs/Chart.js
+@kurkle/color MIT   https://github.com/kurkle/color (dependency of chart.js)
+react-chartjs-2 MIT https://github.com/reactchartjs/react-chartjs-2
 
 ------------------------------------------------------------------------
 2. Build, test and deployment tools (not distributed)

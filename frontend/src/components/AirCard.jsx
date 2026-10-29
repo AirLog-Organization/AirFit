@@ -21,7 +21,7 @@ function AirCard({ air }) {
   if (!air) {
     return (
       <Card title="대기질">
-        <p className="text-slate-500">대기질 정보가 없어요.</p>
+        <p className="text-slate-500 dark:text-slate-400">대기질 정보가 없어요.</p>
       </Card>
     )
   }
@@ -33,10 +33,10 @@ function AirCard({ air }) {
           const { value, grade } = air[key] ?? {}
           return (
             <li key={key} className="text-center">
-              <p className="text-sm text-slate-500">{name}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{name}</p>
               <p className="my-1 text-lg font-semibold">
                 {value ?? '-'}
-                <span className="ml-0.5 text-xs font-normal text-slate-500">{unit}</span>
+                <span className="ml-0.5 text-xs font-normal text-slate-500 dark:text-slate-400">{unit}</span>
               </p>
               <span
                 className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${gradeStyle(grade)}`}
@@ -48,7 +48,7 @@ function AirCard({ air }) {
         })}
       </ul>
       {air.station && (
-        <p className="mt-4 text-xs text-slate-500">
+        <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
           {air.station.name} 측정소 ({air.station.distanceKm}km)
           {air.measuredAt && ` · ${formatTime(air.measuredAt)} 측정`}
         </p>
