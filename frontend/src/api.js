@@ -21,7 +21,7 @@ async function getJson(path, params, signal) {
   }
 
   const body = await response.json().catch(() => null)
-  if (!response.ok) {
+  if (!response.ok || body === null) {
     throw new ApiError(
       response.status,
       body?.error ?? 'unknown_error',
