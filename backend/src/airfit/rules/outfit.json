@@ -1,0 +1,97 @@
+{
+  "bands": [
+    {
+      "min": 28,
+      "summary": "아주 더워요. 통풍이 잘 되는 얇은 옷을 입으세요.",
+      "items": [
+        { "category": "top", "name": "반팔 티셔츠" },
+        { "category": "bottom", "name": "반바지" },
+        { "category": "shoes", "name": "샌들" }
+      ]
+    },
+    {
+      "min": 23,
+      "summary": "더워요. 반팔에 가벼운 바지가 좋아요.",
+      "items": [
+        { "category": "top", "name": "반팔 티셔츠" },
+        { "category": "bottom", "name": "면바지" },
+        { "category": "shoes", "name": "운동화" }
+      ]
+    },
+    {
+      "min": 20,
+      "summary": "선선해요. 얇은 긴팔에 가디건을 걸치세요.",
+      "items": [
+        { "category": "outer", "name": "얇은 가디건" },
+        { "category": "top", "name": "긴팔 티셔츠" },
+        { "category": "bottom", "name": "면바지" }
+      ]
+    },
+    {
+      "min": 17,
+      "summary": "조금 쌀쌀해요. 맨투맨이나 얇은 니트가 좋아요.",
+      "items": [
+        { "category": "top", "name": "맨투맨" },
+        { "category": "bottom", "name": "청바지" }
+      ]
+    },
+    {
+      "min": 12,
+      "summary": "쌀쌀해요. 가벼운 재킷을 걸치세요.",
+      "items": [
+        { "category": "outer", "name": "가벼운 재킷" },
+        { "category": "top", "name": "긴팔 티셔츠" },
+        { "category": "bottom", "name": "청바지" }
+      ]
+    },
+    {
+      "min": 9,
+      "summary": "추워지기 시작해요. 트렌치코트에 니트가 좋아요.",
+      "items": [
+        { "category": "outer", "name": "트렌치코트" },
+        { "category": "top", "name": "니트" },
+        { "category": "bottom", "name": "청바지" }
+      ]
+    },
+    {
+      "min": 5,
+      "summary": "추워요. 코트에 니트를 입고 내복을 챙기세요.",
+      "items": [
+        { "category": "outer", "name": "코트" },
+        { "category": "top", "name": "니트" },
+        { "category": "top", "name": "내복" },
+        { "category": "bottom", "name": "두꺼운 바지" }
+      ]
+    },
+    {
+      "min": null,
+      "summary": "매우 추워요. 패딩과 목도리로 따뜻하게 입으세요.",
+      "items": [
+        { "category": "outer", "name": "패딩" },
+        { "category": "top", "name": "두꺼운 니트" },
+        { "category": "bottom", "name": "기모 바지" },
+        { "category": "accessory", "name": "목도리" }
+      ]
+    }
+  ],
+  "tips": [
+    {
+      "when": { "metric": "dailyRange", "gte": 10 },
+      "text": "일교차가 10도 이상이에요. 벗기 쉬운 겉옷을 챙기세요."
+    },
+    {
+      "when": { "metric": "rainChance", "gte": 60 },
+      "text": "비나 눈 소식이 있어요. 우산을 챙기세요.",
+      "items": [{ "category": "accessory", "name": "우산" }]
+    },
+    {
+      "when": { "metric": "dustGrade", "gte": 3 },
+      "text": "미세먼지가 나빠요. 보건용 마스크(KF80 이상)를 쓰세요.",
+      "items": [{ "category": "accessory", "name": "보건용 마스크" }]
+    },
+    {
+      "when": { "metric": "windSpeed", "gte": 7 },
+      "text": "바람이 강해 실제보다 춥게 느껴질 수 있어요. 바람을 막는 겉옷을 입으세요."
+    }
+  ]
+}
