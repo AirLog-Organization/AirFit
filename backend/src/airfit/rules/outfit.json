@@ -76,21 +76,24 @@
   ],
   "tips": [
     {
-      "when": { "metric": "dailyRange", "gte": 10 },
+      "when": [{ "metric": "dailyRange", "gte": 10 }],
       "text": "일교차가 10도 이상이에요. 벗기 쉬운 겉옷을 챙기세요."
     },
     {
-      "when": { "metric": "rainChance", "gte": 60 },
+      "when": [{ "metric": "rainChance", "gte": 60 }],
       "text": "비나 눈 소식이 있어요. 우산을 챙기세요.",
       "items": [{ "category": "accessory", "name": "우산" }]
     },
     {
-      "when": { "metric": "dustGrade", "gte": 3 },
+      "when": [{ "metric": "dustGrade", "gte": 3 }],
       "text": "미세먼지가 나빠요. 보건용 마스크(KF80 이상)를 쓰세요.",
       "items": [{ "category": "accessory", "name": "보건용 마스크" }]
     },
     {
-      "when": { "metric": "windSpeed", "gte": 7 },
+      "when": [
+        { "metric": "windSpeed", "gte": 7 },
+        { "metric": "feelsLike", "lt": 20 }
+      ],
       "text": "바람이 강해 실제보다 춥게 느껴질 수 있어요. 바람을 막는 겉옷을 입으세요."
     }
   ]

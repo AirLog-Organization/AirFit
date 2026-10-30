@@ -1,6 +1,6 @@
 import pytest
 
-from airfit.outfit import CATEGORIES, METRICS, load_rules, recommend
+from airfit.outfit import CATEGORIES, METRICS, OPERATORS, load_rules, recommend
 
 
 def _weather(**overrides) -> dict:
@@ -35,8 +35,12 @@ def test_rules_file_is_valid():
         assert band["summary"]
         assert band["items"]
     for tip in rules["tips"]:
-        assert tip["when"]["metric"] in METRICS
-        assert isinstance(tip["when"]["gte"], int | float)
+        assert tip["when"]
+        for condition in tip["when"]:
+            assert condition["metric"] in METRICS
+            (op,) = condition.keys() - {"metric"}
+            assert op in OPERATORS
+            assert isinstance(condition[op], int | float)
         assert tip["text"]
     all_items = [item for band in bands for item in band["items"]] + [
         item for tip in rules["tips"] for item in tip.get("items", [])
@@ -131,9 +135,19 @@ def test_dust_tip_adds_mask(air, tip_shown):
     assert ("보건용 마스크" in _names(outfit)) is tip_shown
 
 
-@pytest.mark.parametrize(("wind", "tip_shown"), [(7.0, True), (6.9, False), (None, False)])
-def test_wind_tip(wind, tip_shown):
-    outfit = recommend(_weather(windSpeed=wind))
+@pytest.mark.parametrize(
+    ("wind", "feels", "tip_shown"),
+    [
+        (7.0, 15.0, True),
+        (6.9, 15.0, False),
+        (None, 15.0, False),
+        (7.0, 19.9, True),
+        (7.0, 20.0, False),  # 선선한 날부터는 바람이 불어도 춥다는 팁을 붙이지 않는다
+        (9.0, 30.0, False),
+    ],
+)
+def test_wind_tip_only_when_it_feels_cool(wind, feels, tip_shown):
+    outfit = recommend(_weather(windSpeed=wind, feelsLike=feels))
 
     assert any("바람" in tip for tip in outfit["tips"]) is tip_shown
 

@@ -32,11 +32,12 @@
 | 일교차 | `tempMax - tempMin` | 10도 이상 | 벗기 쉬운 겉옷을 챙기세요 | |
 | 비, 눈 | 앞으로 12시간 예보의 최대 강수 확률. 지금 비나 눈이 오면 100 | 60% 이상 | 우산을 챙기세요 | 우산 |
 | 미세먼지 | 미세먼지(PM10)와 초미세먼지(PM2.5) 등급 중 나쁜 쪽 | 3(나쁨) 이상 | 보건용 마스크(KF80 이상)를 쓰세요 | 보건용 마스크 |
-| 바람 | 현재 풍속 | 7m/s 이상 | 바람을 막는 겉옷을 입으세요 | |
+| 바람 | 현재 풍속과 체감온도 | 7m/s 이상이고 체감온도 20도 미만 | 바람을 막는 겉옷을 입으세요 | |
 
 - 등급은 에어코리아가 준 값을 그대로 씁니다(1 좋음, 2 보통, 3 나쁨, 4 매우나쁨).
 - 비는 외출하는 동안 필요한지가 중요해서 하루 전체가 아니라 앞으로 12시간(3시간 간격 예보 4개)만 봅니다.
-- 일교차, 강수 확률, 풍속 기준값은 팀이 정한 값입니다.
+- 바람 팁은 "춥게 느껴질 수 있다"는 내용이라, 더운 날에 붙지 않도록 체감온도가 20도(선선한 구간) 미만일 때만 보여 줍니다.
+- 일교차, 강수 확률, 풍속, 체감온도 기준값은 팀이 정한 값입니다.
 
 ## 규칙 파일 구조
 
@@ -47,7 +48,8 @@
     { "min": null, "summary": "...", "items": [] }
   ],
   "tips": [
-    { "when": { "metric": "rainChance", "gte": 60 }, "text": "...", "items": [{ "category": "accessory", "name": "우산" }] }
+    { "when": [{ "metric": "rainChance", "gte": 60 }], "text": "...", "items": [{ "category": "accessory", "name": "우산" }] },
+    { "when": [{ "metric": "windSpeed", "gte": 7 }, { "metric": "feelsLike", "lt": 20 }], "text": "..." }
   ]
 }
 ```
@@ -56,8 +58,9 @@
 | --- | --- |
 | `bands` | 높은 온도부터 적습니다. `min` 이상이면 그 구간이고, 마지막 구간은 `min: null`로 나머지를 모두 받습니다 |
 | `items[].category` | `outer`, `top`, `bottom`, `shoes`, `accessory` 중 하나. 3단계 옷장 등록에서도 같은 값을 씁니다 |
-| `tips[].when.metric` | `dailyRange`(일교차), `rainChance`(강수 확률), `dustGrade`(미세먼지 등급), `windSpeed`(풍속) 중 하나 |
-| `tips[].when.gte` | 이 값 이상이면 팁을 보여 줍니다 |
+| `tips[].when` | 조건 목록. 모두 맞아야 팁을 보여 줍니다 |
+| `tips[].when[].metric` | `feelsLike`(체감온도), `dailyRange`(일교차), `rainChance`(강수 확률), `dustGrade`(미세먼지 등급), `windSpeed`(풍속) 중 하나 |
+| `tips[].when[].gte`, `lt` | 둘 중 하나. `gte`는 이 값 이상, `lt`는 이 값 미만일 때 맞습니다 |
 | `tips[].items` | 선택. 팁과 함께 추천할 소품 |
 
-`backend/tests/test_outfit.py`가 구간 순서, `category` 값, `metric` 이름을 검사하므로, 규칙을 고친 뒤 `pytest`로 확인해 주세요. 기여 절차는 [CONTRIBUTING.md](../CONTRIBUTING.md)의 "규칙(JSON) 기여"를 따릅니다.
+`backend/tests/test_outfit.py`가 구간 순서, `category` 값, `metric` 이름, 비교 연산자를 검사하므로, 규칙을 고친 뒤 `pytest`로 확인해 주세요. 기여 절차는 [CONTRIBUTING.md](../CONTRIBUTING.md)의 "규칙(JSON) 기여"를 따릅니다.
