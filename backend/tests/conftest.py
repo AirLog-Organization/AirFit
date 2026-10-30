@@ -20,7 +20,7 @@ ROUTES = {
 
 
 def load_fixture(name: str) -> dict:
-    return json.loads((FIXTURES / f"{name}.json").read_text())
+    return json.loads((FIXTURES / f"{name}.json").read_text(encoding="utf-8"))
 
 
 @pytest.fixture(autouse=True)
