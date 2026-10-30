@@ -1,0 +1,114 @@
+{
+  "documents": [
+    {
+      "address": {
+        "address_name": "서울 노원구 월계동",
+        "b_code": "1135010200",
+        "h_code": "",
+        "main_address_no": "",
+        "mountain_yn": "N",
+        "region_1depth_name": "서울",
+        "region_2depth_name": "노원구",
+        "region_3depth_h_name": "",
+        "region_3depth_name": "월계동",
+        "sub_address_no": "",
+        "x": "127.062987742987",
+        "y": "37.6199191869583"
+      },
+      "address_name": "서울 노원구 월계동",
+      "address_type": "REGION",
+      "road_address": null,
+      "x": "127.062987742987",
+      "y": "37.6199191869583"
+    },
+    {
+      "address": {
+        "address_name": "서울 노원구 월계1동",
+        "b_code": "",
+        "h_code": "1135056000",
+        "main_address_no": "",
+        "mountain_yn": "N",
+        "region_1depth_name": "서울",
+        "region_2depth_name": "노원구",
+        "region_3depth_h_name": "월계1동",
+        "region_3depth_name": "",
+        "sub_address_no": "",
+        "x": "127.063001311172",
+        "y": "37.6198903481106"
+      },
+      "address_name": "서울 노원구 월계1동",
+      "address_type": "REGION",
+      "road_address": null,
+      "x": "127.063001311172",
+      "y": "37.6198903481106"
+    },
+    {
+      "address": {
+        "address_name": "서울 노원구 월계2동",
+        "b_code": "",
+        "h_code": "1135057000",
+        "main_address_no": "",
+        "mountain_yn": "N",
+        "region_1depth_name": "서울",
+        "region_2depth_name": "노원구",
+        "region_3depth_h_name": "월계2동",
+        "region_3depth_name": "",
+        "sub_address_no": "",
+        "x": "127.050744895708",
+        "y": "37.6324884457576"
+      },
+      "address_name": "서울 노원구 월계2동",
+      "address_type": "REGION",
+      "road_address": null,
+      "x": "127.050744895708",
+      "y": "37.6324884457576"
+    },
+    {
+      "address": {
+        "address_name": "서울 노원구 월계3동",
+        "b_code": "",
+        "h_code": "1135058000",
+        "main_address_no": "",
+        "mountain_yn": "N",
+        "region_1depth_name": "서울",
+        "region_2depth_name": "노원구",
+        "region_3depth_h_name": "월계3동",
+        "region_3depth_name": "",
+        "sub_address_no": "",
+        "x": "127.069259441758",
+        "y": "37.6210148773623"
+      },
+      "address_name": "서울 노원구 월계3동",
+      "address_type": "REGION",
+      "road_address": null,
+      "x": "127.069259441758",
+      "y": "37.6210148773623"
+    },
+    {
+      "address": {
+        "address_name": "전남광주통합특별시 광산구 월계동",
+        "b_code": "1233011500",
+        "h_code": "",
+        "main_address_no": "",
+        "mountain_yn": "N",
+        "region_1depth_name": "전남광주통합특별시",
+        "region_2depth_name": "광산구",
+        "region_3depth_h_name": "",
+        "region_3depth_name": "월계동",
+        "sub_address_no": "",
+        "x": "126.836183980128",
+        "y": "35.2130871081696"
+      },
+      "address_name": "전남광주통합특별시 광산구 월계동",
+      "address_type": "REGION",
+      "road_address": null,
+      "x": "126.836183980128",
+      "y": "35.2130871081696"
+    }
+  ],
+  "meta": {
+    "is_end": true,
+    "pageable_count": 5,
+    "total_count": 5
+  }
+}

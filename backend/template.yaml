@@ -2,6 +2,21 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: AirFit backend (API Gateway HTTP API + Lambda)
 
+# 외부 API 키. 배포 때 --parameter-overrides로 넘긴다. 비어 있으면 /api/health만 정상 동작한다
+Parameters:
+  KakaoRestApiKey:
+    Type: String
+    NoEcho: true
+    Default: ""
+  OpenWeatherApiKey:
+    Type: String
+    NoEcho: true
+    Default: ""
+  AirKoreaServiceKey:
+    Type: String
+    NoEcho: true
+    Default: ""
+
 Globals:
   Function:
     Runtime: python3.14
@@ -22,12 +37,29 @@ Resources:
     Properties:
       CodeUri: src/
       Handler: airfit.handler.lambda_handler
+      Environment:
+        Variables:
+          KAKAO_REST_API_KEY: !Ref KakaoRestApiKey
+          OPENWEATHER_API_KEY: !Ref OpenWeatherApiKey
+          AIRKOREA_SERVICE_KEY: !Ref AirKoreaServiceKey
       Events:
         Health:
           Type: HttpApi
           Properties:
             ApiId: !Ref HttpApi
             Path: /api/health
+            Method: GET
+        Regions:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/regions
+            Method: GET
+        Conditions:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/conditions
             Method: GET
 
   # 프론트 빌드 결과물. 이름을 비워 두면 airfit-backend-frontendbucket-xxxx로 만들어져 실행 role 권한 범위에 들어간다
