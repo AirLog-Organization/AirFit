@@ -53,9 +53,18 @@ jobs:
           --no-confirm-changeset
           --no-fail-on-empty-changeset
           --role-arn "${{ vars.AWS_CFN_EXEC_ROLE_ARN }}"
+          --parameter-overrides   
+          "KakaoRestApiKey=$KAKAO_REST_API_KEY"
+          "OpenWeatherApiKey=$OPENWEATHER_API_KEY"
+          "AirKoreaServiceKey=$AIRKOREA_SERVICE_KEY"
+        env:
+          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+          AIRKOREA_SERVICE_KEY: ${{ secrets.AIRKOREA_SERVICE_KEY }}
 
       - name: Smoke test
         run: |
           api_url=$(aws cloudformation describe-stacks --stack-name airfit-backend \
             --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text)
           curl -fsS "$api_url/api/health"
+          curl -fsS "$api_url/api/regions?q=%EC%84%9C%EC%9A%B8" > /dev/null
