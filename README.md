@@ -98,8 +98,8 @@ AirFit은 아래 외부 서비스를 API로 호출만 하며, 해당 서비스�
 | 사용 API | 주소로 좌표 변환(`search/address`), 좌표로 행정구역정보 변환(`geo/coord2regioncode`), 좌표계 변환(`geo/transcoord`). 카카오맵 REST API 정책을 따름 |
 | 호출 제한 | 무료 쿼터는 API별 일일 100,000건, 전체 API 월 3,000,000건. 개발자 계정에서 처음 활성화한 앱에만 제공됨 |
 | 초과 시 | 429 에러. 유료 API를 설정하면 건당 0.5원으로 추가 호출 가능 (AirFit은 무료 쿼터만 사용) |
-| 출처 표기 | 의무 없음 |
-| 상표 | 카카오 상표는 서비스 특성을 설명하는 문구에만 쓸 수 있고, 서비스 이름이나 로고, 아이콘에는 쓸 수 없습니다. AirFit은 Kakao와 제휴하거나 Kakao가 제공하는 서비스가 아닙니다 |
+| 출처 표기 | 확인한 공식 문서(쿼터, 카카오맵 이해하기, 운영 정책, 서비스 약관)에서 별도 출처 표기 요구를 찾지 못함 |
+| 상표 | 카카오 상표는 서비스 특성을 설명하는 문구에만 쓸 수 있고, 쓸 때는 첨자 ®을 붙여야 합니다(운영 정책 제18조). 서비스 이름이나 로고, 아이콘에는 쓸 수 없습니다. AirFit은 Kakao와 제휴하거나 Kakao가 제공하는 서비스가 아닙니다 |
 | 캐시 | 사용자 경험 개선 목적으로만 허용되고, 캐시한 데이터는 최신으로 유지해야 합니다 |
 
 이용 조건은 바뀔 수 있으니 [공공데이터포털](https://www.data.go.kr/), [OpenWeather](https://openweathermap.org/price), [Kakao Developers 쿼터](https://developers.kakao.com/docs/ko/getting-started/quota)와 [운영 정책](https://developers.kakao.com/terms/ko/site-policies)에서 최신 내용을 확인해 주세요.
