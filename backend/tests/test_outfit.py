@@ -1,6 +1,7 @@
 import pytest
 
-from airfit.outfit import CATEGORIES, METRICS, OPERATORS, load_rules, recommend
+from airfit.outfit import CATEGORIES, load_rules, recommend
+from airfit.rule_engine import is_valid_condition
 
 
 def _weather(**overrides) -> dict:
@@ -36,11 +37,7 @@ def test_rules_file_is_valid():
         assert band["items"]
     for tip in rules["tips"]:
         assert tip["when"]
-        for condition in tip["when"]:
-            assert condition["metric"] in METRICS
-            (op,) = condition.keys() - {"metric"}
-            assert op in OPERATORS
-            assert isinstance(condition[op], int | float)
+        assert all(is_valid_condition(condition) for condition in tip["when"])
         assert tip["text"]
     all_items = [item for band in bands for item in band["items"]] + [
         item for tip in rules["tips"] for item in tip.get("items", [])

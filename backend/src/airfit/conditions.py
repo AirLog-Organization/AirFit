@@ -4,14 +4,13 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
-from airfit import airkorea, kakao, openweather, outfit
+from airfit import airkorea, kakao, life_indices, openweather, outfit
 from airfit.timeutil import KST
 from airfit.upstream import UpstreamError
 
 logger = logging.getLogger(__name__)
 
 SOURCES = ["에어코리아", "OpenWeatherMap"]
-INDEX_KEYS = ["outing", "mask", "ventilation", "laundry"]
 
 
 class AllSourcesFailed(Exception):
@@ -60,8 +59,8 @@ def get_conditions(lat: float, lon: float) -> dict:
         "location": {**region, "lat": lat, "lon": lon},
         "weather": weather,
         "air": air,
-        # 산출 기준(docs/life-indices.md)이 정해지면 채운다
-        "indices": dict.fromkeys(INDEX_KEYS),
+        # 필요한 값이 없는 지수만 None. 기준은 docs/life-indices.md
+        "indices": life_indices.calculate(weather, air, hourly),
         # 날씨가 없으면 None. 기준은 docs/outfit-rules.md
         "outfit": outfit.recommend(weather, air, hourly),
         "hourly": hourly,

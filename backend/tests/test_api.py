@@ -62,6 +62,11 @@ def test_conditions_combines_all_sources(fake_upstream):
     assert len(body["hourly"]) == 8
     assert set(body["outfit"]) == {"summary", "items", "tips"}
     assert body["outfit"]["items"]
+    assert set(body["indices"]) == {"outing", "mask", "ventilation", "laundry"}
+    assert all(set(index) == {"grade", "label", "summary"} for index in body["indices"].values())
+    # fixture는 비가 오는 날(code 500)이라 빨래는 밖에 널 수 없다
+    assert body["indices"]["laundry"]["grade"] == 4
+    assert body["indices"]["mask"]["label"] == "선택"  # PM10 보통(2)
     assert body["warnings"] == []
 
 
@@ -81,6 +86,9 @@ def test_conditions_partial_failure_keeps_weather(fake_upstream):
     assert body["air"] is None
     assert body["weather"] is not None
     assert body["outfit"] is not None  # 대기질이 없으면 미세먼지 팁만 빠진다
+    assert body["indices"]["mask"] is None
+    assert body["indices"]["ventilation"] is None
+    assert body["indices"]["outing"] is not None
     assert body["warnings"][0]["source"] == "air"
 
 
@@ -93,6 +101,9 @@ def test_conditions_without_weather_has_no_outfit(fake_upstream):
     assert status == 200
     assert body["weather"] is None
     assert body["outfit"] is None
+    assert body["indices"]["outing"] is None
+    assert body["indices"]["laundry"] is None
+    assert body["indices"]["mask"] is not None
     assert body["warnings"][0]["source"] == "weather"
 
 
