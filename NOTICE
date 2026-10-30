@@ -76,3 +76,5 @@ requirements are described in README.md.
 - AirKorea air quality and station information, Korea Environment
   Corporation, via data.go.kr (KOGL Type 3)
 - OpenWeather (openweathermap.org)
+- Kakao Local API, Kakao Corp., via Kakao Developers (developers.kakao.com).
+  AirFit is not affiliated with or endorsed by Kakao.
