@@ -59,7 +59,7 @@
 | `bands` | 높은 온도부터 적습니다. `min` 이상이면 그 구간이고, 마지막 구간은 `min: null`로 나머지를 모두 받습니다 |
 | `items[].category` | `outer`, `top`, `bottom`, `shoes`, `accessory` 중 하나. 3단계 옷장 등록에서도 같은 값을 씁니다 |
 | `tips[].when` | 조건 목록. 모두 맞아야 팁을 보여 줍니다 |
-| `tips[].when[].metric` | `feelsLike`(체감온도), `dailyRange`(일교차), `rainChance`(강수 확률), `dustGrade`(미세먼지 등급), `windSpeed`(풍속) 중 하나 |
+| `tips[].when[].metric` | `feelsLike`(체감온도), `humidity`(습도), `precipitation`(최근 1시간 강수량), `dailyRange`(일교차), `rainChance`(강수 확률), `dustGrade`(미세먼지 등급), `windSpeed`(풍속) 중 하나. 자세한 뜻은 [`life-indices.md`](life-indices.md)의 "규칙 파일 구조" |
 | `tips[].when[].gte`, `lt` | 둘 중 하나. `gte`는 이 값 이상, `lt`는 이 값 미만일 때 맞습니다 |
 | `tips[].items` | 선택. 팁과 함께 추천할 소품 |
 
