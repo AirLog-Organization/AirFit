@@ -39,6 +39,16 @@ def test_regions_requires_query(fake_upstream):
     assert body["error"] == "invalid_params"
 
 
+def test_regions_rejects_long_query(fake_upstream):
+    _, calls = fake_upstream
+
+    status, body = _get("/api/regions", q="가" * 101)
+
+    assert status == 400
+    assert body["error"] == "invalid_params"
+    assert calls == []
+
+
 def test_regions_upstream_failure(fake_upstream):
     overrides, _ = fake_upstream
     overrides["search/address.json"] = UpstreamError("down")
@@ -115,6 +125,26 @@ def test_conditions_without_region_name(fake_upstream):
 
     assert status == 200
     assert body["location"]["name"] is None
+
+
+def test_conditions_at_sea_uses_full_name(fake_upstream):
+    overrides, _ = fake_upstream
+    # 2026-10-30 (36.0, 124.0)으로 실제 호출한 응답
+    sea = {
+        "region_type": "H",
+        "code": "90009",
+        "address_name": "서해",
+        "region_1depth_name": "",
+        "region_2depth_name": "",
+        "region_3depth_name": "",
+    }
+    overrides["coord2regioncode.json"] = {"documents": [{**sea, "region_type": "B"}, sea]}
+
+    status, body = _get("/api/conditions", lat="36.0", lon="124.0")
+
+    assert status == 200
+    assert body["location"]["name"] == "서해"
+    assert body["location"]["fullName"] == "서해"
 
 
 def test_air_skips_station_with_missing_values(fake_upstream):

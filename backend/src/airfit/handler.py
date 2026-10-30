@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 # 국내 범위 밖 좌표는 Kakao, 에어코리아 모두 결과가 없다
 LAT_RANGE = (33.0, 39.0)
 LON_RANGE = (124.0, 132.0)
+# 한글 200~300자 사이에서 Kakao가 400을 돌려준다. 주소 검색어로는 100자면 충분하다
+MAX_QUERY_LENGTH = 100
 
 
 def _response(status: int, body: dict) -> dict:
@@ -30,6 +32,8 @@ def _regions(params: dict) -> dict:
     query = params.get("q", "").strip()
     if not query:
         return _error(400, "invalid_params", "검색어(q)를 입력해 주세요.")
+    if len(query) > MAX_QUERY_LENGTH:
+        return _error(400, "invalid_params", f"검색어는 {MAX_QUERY_LENGTH}자까지 입력할 수 있어요.")
     try:
         return _response(200, {"regions": kakao.search_regions(query)})
     except UpstreamError:
