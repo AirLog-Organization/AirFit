@@ -3,7 +3,7 @@
 import json
 import logging
 
-from airfit import kakao
+from airfit import cache, kakao
 from airfit.conditions import AllSourcesFailed, get_conditions
 from airfit.upstream import UpstreamError
 
@@ -14,6 +14,8 @@ LAT_RANGE = (33.0, 39.0)
 LON_RANGE = (124.0, 132.0)
 # 한글 200~300자 사이에서 Kakao가 400을 돌려준다. 주소 검색어로는 100자면 충분하다
 MAX_QUERY_LENGTH = 100
+# 주소 검색 결과는 행정구역이 바뀔 때만 달라진다
+REGIONS_TTL = 7 * 24 * 3600
 
 
 def _response(status: int, body: dict) -> dict:
@@ -35,7 +37,10 @@ def _regions(params: dict) -> dict:
     if len(query) > MAX_QUERY_LENGTH:
         return _error(400, "invalid_params", f"검색어는 {MAX_QUERY_LENGTH}자까지 입력할 수 있어요.")
     try:
-        return _response(200, {"regions": kakao.search_regions(query)})
+        regions = cache.get_or_fetch(
+            f"regions#{query}", REGIONS_TTL, lambda: kakao.search_regions(query)
+        )
+        return _response(200, {"regions": regions})
     except UpstreamError:
         logger.exception("지역 검색 실패")
         return _error(502, "upstream_error", "지역 검색에 잠시 실패했어요.")
