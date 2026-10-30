@@ -1,0 +1,120 @@
+{
+  "outing": {
+    "requires": ["feelsLike"],
+    "labels": ["좋음", "보통", "주의", "자제"],
+    "default": "산책하기 좋은 날이에요.",
+    "rules": [
+      {
+        "when": [{ "metric": "dustGrade", "gte": 4 }],
+        "grade": 4,
+        "summary": "미세먼지가 매우 나빠요. 외출을 줄이세요."
+      },
+      {
+        "when": [{ "metric": "dustGrade", "gte": 3 }],
+        "grade": 3,
+        "summary": "미세먼지가 나빠요. 밖에 오래 있지 마세요."
+      },
+      {
+        "when": [{ "metric": "feelsLike", "gte": 33 }],
+        "grade": 3,
+        "summary": "아주 더워요. 한낮 외출은 피하세요."
+      },
+      {
+        "when": [{ "metric": "feelsLike", "lt": -10 }],
+        "grade": 3,
+        "summary": "매우 추워요. 따뜻하게 입고 짧게 다녀오세요."
+      },
+      {
+        "when": [{ "metric": "rainChance", "gte": 60 }],
+        "grade": 2,
+        "summary": "비나 눈 소식이 있어요. 우산을 챙기세요."
+      }
+    ]
+  },
+  "mask": {
+    "requires": ["dustGrade"],
+    "labels": ["불필요", "선택", "권장", "필수"],
+    "default": "마스크 없이 다녀도 괜찮아요.",
+    "rules": [
+      {
+        "when": [{ "metric": "dustGrade", "gte": 4 }],
+        "grade": 4,
+        "summary": "미세먼지가 매우 나빠요. 보건용 마스크를 꼭 쓰세요."
+      },
+      {
+        "when": [{ "metric": "dustGrade", "gte": 3 }],
+        "grade": 3,
+        "summary": "미세먼지가 나빠요. 보건용 마스크(KF80 이상)를 쓰세요."
+      },
+      {
+        "when": [{ "metric": "dustGrade", "gte": 2 }],
+        "grade": 2,
+        "summary": "민감군은 마스크를 챙기세요."
+      }
+    ]
+  },
+  "ventilation": {
+    "requires": ["dustGrade"],
+    "labels": ["좋음", "보통", "짧게", "자제"],
+    "default": "10분 이상 창문을 열어 두세요.",
+    "rules": [
+      {
+        "when": [{ "metric": "dustGrade", "gte": 4 }],
+        "grade": 4,
+        "summary": "미세먼지가 매우 나빠요. 창문을 닫아 두세요."
+      },
+      {
+        "when": [{ "metric": "dustGrade", "gte": 3 }],
+        "grade": 3,
+        "summary": "미세먼지가 나빠요. 요리한 뒤에만 짧게 환기하세요."
+      },
+      {
+        "when": [{ "metric": "precipitation", "gte": 0.1 }],
+        "grade": 2,
+        "summary": "비가 와요. 비가 들이치지 않게 조금만 열어 두세요."
+      },
+      {
+        "when": [{ "metric": "dustGrade", "gte": 2 }],
+        "grade": 2,
+        "summary": "환기해도 괜찮아요. 10분 정도만 열어 두세요."
+      }
+    ]
+  },
+  "laundry": {
+    "requires": ["humidity"],
+    "labels": ["좋음", "보통", "실내 건조", "불가"],
+    "default": "햇볕과 바람에 잘 말라요.",
+    "rules": [
+      {
+        "when": [{ "metric": "precipitation", "gte": 0.1 }],
+        "grade": 4,
+        "summary": "비나 눈이 와서 밖에 널 수 없어요."
+      },
+      {
+        "when": [{ "metric": "rainChance", "gte": 60 }],
+        "grade": 3,
+        "summary": "비 소식이 있어요. 실내에서 말리세요."
+      },
+      {
+        "when": [{ "metric": "humidity", "gte": 80 }],
+        "grade": 3,
+        "summary": "습해서 잘 마르지 않아요. 실내에서 말리세요."
+      },
+      {
+        "when": [{ "metric": "dustGrade", "gte": 3 }],
+        "grade": 3,
+        "summary": "미세먼지가 나빠요. 실내에서 말리세요."
+      },
+      {
+        "when": [{ "metric": "humidity", "gte": 60 }],
+        "grade": 2,
+        "summary": "조금 습해요. 바람이 잘 드는 곳에 너세요."
+      },
+      {
+        "when": [{ "metric": "feelsLike", "lt": 5 }],
+        "grade": 2,
+        "summary": "추워서 마르는 데 오래 걸려요."
+      }
+    ]
+  }
+}
