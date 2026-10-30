@@ -64,7 +64,7 @@ npm run dev
 
 - PR마다 GitHub Actions가 `backend`, `frontend` CI를 실행합니다. 두 체크가 통과하고 리뷰 승인 1명을 받아야 `main`에 병합할 수 있습니다.
 - `backend/` 코드가 바뀐 PR이 `main`에 병합되면 Deploy workflow가 AWS SAM으로 백엔드(API Gateway HTTP API + Lambda)를 배포합니다. AWS 인증은 장기 키 대신 OIDC를 사용합니다.
-- 프론트엔드(S3, CloudFront) 배포는 준비 중입니다.
+- `frontend/` 코드가 바뀐 PR이 `main`에 병합되면 Deploy Frontend workflow가 빌드 결과를 S3에 올리고 CloudFront 캐시를 비웁니다. 화면과 API는 CloudFront 주소 하나로 제공되고, `/api/*` 요청은 API Gateway로 전달됩니다.
 
 ## 데이터 출처와 이용 조건
 

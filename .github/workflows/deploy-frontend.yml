@@ -1,0 +1,86 @@
+name: Deploy Frontend
+
+# main에 들어온 프론트 변경을 빌드해 S3에 올리고 CloudFront 캐시를 비운다. 테스트는 PR 단계의 Frontend CI가 맡는다.
+on:
+  push:
+    branches: [main]
+    paths:
+      - frontend/**
+      - .github/workflows/deploy-frontend.yml
+  workflow_dispatch:
+
+permissions:
+  # OIDC 토큰으로 AWS role을 맡는다 (장기 키 없음)
+  id-token: write
+  contents: read
+
+# 업로드가 겹치면 섞인 파일이 올라갈 수 있으므로 하나씩, 진행 중인 배포는 끊지 않는다
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: frontend
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    # 버킷 이름과 배포 ID는 백엔드 스택 출력값(FrontendBucketName, DistributionId)을 저장소 변수로 넣어 둔다
+    env:
+      BUCKET: ${{ vars.FRONTEND_BUCKET }}
+      DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+    steps:
+      - name: Check repository variables
+        run: |
+          if [ -z "$BUCKET" ] || [ -z "$DISTRIBUTION_ID" ]; then
+            echo "::error::저장소 변수 FRONTEND_BUCKET, CLOUDFRONT_DISTRIBUTION_ID를 먼저 등록해 주세요."
+            exit 1
+          fi
+        working-directory: .
+
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ap-northeast-2
+
+      # 파일명에 해시가 붙은 assets는 내용이 바뀌면 이름도 바뀌므로 오래 캐시한다.
+      # 이전 index.html을 받은 사용자가 예전 assets를 계속 받을 수 있도록 지난 빌드 파일은 지우지 않는다
+      - name: Upload hashed assets
+        run: >-
+          aws s3 sync dist/assets "s3://$BUCKET/assets"
+          --cache-control "public, max-age=31536000, immutable"
+
+      # index.html 등은 매번 새로 확인하게 해서 배포 직후 새 assets를 가리키게 한다.
+      # --delete는 assets/를 제외한 나머지 파일에만 적용된다
+      - name: Upload other files
+        run: >-
+          aws s3 sync dist "s3://$BUCKET" --delete --exclude "assets/*"
+          --cache-control "no-cache"
+
+      - name: Invalidate CloudFront cache
+        run: |
+          id=$(aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" \
+            --paths "/*" --query Invalidation.Id --output text)
+          aws cloudfront wait invalidation-completed --distribution-id "$DISTRIBUTION_ID" --id "$id"
+
+      - name: Smoke test
+        run: |
+          site_url=$(aws cloudformation describe-stacks --stack-name airfit-backend \
+            --query "Stacks[0].Outputs[?OutputKey=='SiteUrl'].OutputValue" --output text)
+          curl -fsS "$site_url/" | grep -q '<div id="root">'
+          curl -fsS "$site_url/api/health"
