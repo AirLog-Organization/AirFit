@@ -18,7 +18,7 @@ PORT = 3000
 def load_env(path: Path) -> None:
     if not path.exists():
         sys.exit(f"{path}가 없습니다. .env.example을 복사해 키를 채워 주세요.")
-    for line in path.read_text().splitlines():
+    for line in path.read_text(encoding="utf-8").splitlines():
         if "=" in line and not line.lstrip().startswith("#"):
             key, value = line.split("=", 1)
             os.environ.setdefault(key.strip(), value.strip())
