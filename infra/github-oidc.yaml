@@ -6,7 +6,8 @@ Description: >-
 Parameters:
   GitHubRepo:
     Type: String
-    Default: AirLog-Organization/AirFit
+    # Immutable subject format (owner@id/repo@id) used by this repository's OIDC tokens
+    Default: AirLog-Organization@335399535/AirFit@1394618774
   DeployBranch:
     Type: String
     Default: main
@@ -84,6 +85,20 @@ Resources:
                 Condition:
                   StringEquals:
                     iam:PassedToService: cloudformation.amazonaws.com
+              # Frontend deploy workflow: upload build output and invalidate the CDN cache
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub arn:${AWS::Partition}:s3:::${AppStackName}-frontendbucket-*
+                  - !Sub arn:${AWS::Partition}:s3:::${AppStackName}-frontendbucket-*/*
+              - Effect: Allow
+                Action:
+                  - cloudfront:CreateInvalidation
+                  - cloudfront:GetInvalidation
+                Resource: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/*
 
   # Role CloudFormation uses to create and update the app stack's resources.
   # DynamoDB, SSM, S3, and CloudFront are opened ahead of time for upcoming template changes,
@@ -104,6 +119,10 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
+              # Expand the SAM transform when CloudFormation runs under this role
+              - Effect: Allow
+                Action: cloudformation:CreateChangeSet
+                Resource: !Sub arn:${AWS::Partition}:cloudformation:${AWS::Region}:aws:transform/Serverless-2016-10-31
               - Effect: Allow
                 Action: lambda:*
                 Resource: !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${AppStackName}-*
