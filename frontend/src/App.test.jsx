@@ -117,8 +117,8 @@ test('falls back to region search when location is denied', async () => {
   render(<App />)
 
   expect(screen.getByText(/위치 권한이 없어/)).toBeInTheDocument()
-  await user.type(screen.getByLabelText('지역 검색'), '강남')
-  await user.click(await screen.findByRole('button', { name: '서울 강남구' }))
+  await user.type(screen.getByRole('combobox', { name: '지역 검색' }), '강남')
+  await user.click(await screen.findByRole('option', { name: '서울 강남구' }))
 
   await screen.findByRole('region', { name: '날씨' })
   expect(fetchMock).toHaveBeenLastCalledWith(
@@ -174,7 +174,7 @@ test('opens region search when the position is outside Korea', async () => {
   render(<App />)
 
   expect(await screen.findByText('국내 좌표만 조회할 수 있어요.')).toBeInTheDocument()
-  expect(screen.getByLabelText('지역 검색')).toBeInTheDocument()
+  expect(screen.getByRole('combobox', { name: '지역 검색' })).toBeInTheDocument()
 })
 
 test('a late position does not override the region the user picked', async () => {
@@ -191,8 +191,8 @@ test('a late position does not override the region the user picked', async () =>
 
   render(<App />)
   await user.click(screen.getByRole('button', { name: '지역 검색' }))
-  await user.type(screen.getByLabelText('지역 검색'), '수원')
-  await user.click(await screen.findByRole('button', { name: '경기 수원시' }))
+  await user.type(screen.getByRole('combobox', { name: '지역 검색' }), '수원')
+  await user.click(await screen.findByRole('option', { name: '경기 수원시' }))
   await screen.findByRole('region', { name: '날씨' })
 
   resolvePosition({ coords: { latitude: 37.6199, longitude: 127.063 } })
