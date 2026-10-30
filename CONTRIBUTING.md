@@ -92,7 +92,7 @@ GitHub Flow를 따릅니다.
 | `backend` | `ruff check`, `ruff format --check`, `pytest`(커버리지 70% 이상), `sam validate --lint` |
 | `frontend` | `npm run lint`, `npm test`, `npm run build` |
 
-`backend/` 코드가 바뀐 PR이 `main`에 병합되면 Deploy workflow가 백엔드를 AWS에 자동 배포합니다.
+`main`에 병합되면 바뀐 영역에 따라 자동 배포됩니다. `backend/`가 바뀌면 Deploy workflow가 백엔드를, `frontend/`가 바뀌면 Deploy Frontend workflow가 프론트엔드를 AWS에 배포합니다.
 
 ### 팀 내 교차 리뷰
 
