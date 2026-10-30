@@ -33,7 +33,7 @@ def search_regions(query: str, size: int = 10) -> list[dict]:
 
 
 def region_name(lat: float, lon: float) -> dict | None:
-    """좌표의 행정동 이름. 바다처럼 행정구역이 없는 좌표면 None."""
+    """좌표의 행정동 이름. 행정동 결과가 없으면 None."""
     data = upstream.get_json(
         f"{BASE_URL}/geo/coord2regioncode.json", {"x": lon, "y": lat}, _headers()
     )
@@ -41,7 +41,8 @@ def region_name(lat: float, lon: float) -> dict | None:
         if doc["region_type"] == "H":
             parts = [doc["region_2depth_name"], doc["region_3depth_name"]]
             return {
-                "name": " ".join(p for p in parts if p),
+                # 바다는 "서해"처럼 1단계 이름만 오므로 전체 이름으로 대신한다
+                "name": " ".join(p for p in parts if p) or doc["address_name"],
                 "fullName": doc["address_name"],
                 "regionCode": doc["code"],
             }
