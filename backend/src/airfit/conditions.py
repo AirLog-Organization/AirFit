@@ -4,7 +4,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
-from airfit import airkorea, kakao, openweather
+from airfit import airkorea, kakao, openweather, outfit
 from airfit.timeutil import KST
 from airfit.upstream import UpstreamError
 
@@ -62,7 +62,8 @@ def get_conditions(lat: float, lon: float) -> dict:
         "air": air,
         # 산출 기준(docs/life-indices.md)이 정해지면 채운다
         "indices": dict.fromkeys(INDEX_KEYS),
-        "outfit": None,
+        # 날씨가 없으면 None. 기준은 docs/outfit-rules.md
+        "outfit": outfit.recommend(weather, air, hourly),
         "hourly": hourly,
         "warnings": warnings,
         "meta": {

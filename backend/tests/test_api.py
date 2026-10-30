@@ -60,6 +60,8 @@ def test_conditions_combines_all_sources(fake_upstream):
     assert body["air"]["pm10"] == {"value": 43, "grade": 2}
     assert body["air"]["pm25"] == {"value": 15, "grade": 1}
     assert len(body["hourly"]) == 8
+    assert set(body["outfit"]) == {"summary", "items", "tips"}
+    assert body["outfit"]["items"]
     assert body["warnings"] == []
 
 
@@ -78,7 +80,20 @@ def test_conditions_partial_failure_keeps_weather(fake_upstream):
     assert status == 200
     assert body["air"] is None
     assert body["weather"] is not None
+    assert body["outfit"] is not None  # 대기질이 없으면 미세먼지 팁만 빠진다
     assert body["warnings"][0]["source"] == "air"
+
+
+def test_conditions_without_weather_has_no_outfit(fake_upstream):
+    overrides, _ = fake_upstream
+    overrides["/weather"] = UpstreamError("down")
+
+    status, body = _get("/api/conditions", lat="37.6199", lon="127.0630")
+
+    assert status == 200
+    assert body["weather"] is None
+    assert body["outfit"] is None
+    assert body["warnings"][0]["source"] == "weather"
 
 
 def test_conditions_all_failed(fake_upstream):
