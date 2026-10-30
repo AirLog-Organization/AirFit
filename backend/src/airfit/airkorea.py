@@ -4,6 +4,7 @@ import os
 
 from airfit import upstream
 from airfit.timeutil import from_airkorea
+from airfit.upstream import UpstreamError
 
 BASE_URL = "https://apis.data.go.kr/B552584"
 
@@ -13,6 +14,12 @@ def _params(**extra) -> dict:
 
 
 def _items(data: dict) -> list[dict]:
+    # 오류도 HTTP 200에 items: null로 오므로, 빈 결과로 캐시되지 않게 resultCode로 실패를 가른다
+    code = data["response"]["header"]["resultCode"]
+    if code == "03":  # NODATA_ERROR
+        return []
+    if code != "00":
+        raise UpstreamError(f"에어코리아 resultCode {code}")
     return data["response"]["body"]["items"] or []
 
 

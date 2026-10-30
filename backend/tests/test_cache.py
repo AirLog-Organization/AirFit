@@ -103,6 +103,21 @@ def test_upstream_failure_is_not_cached(fake_upstream, table):
     assert not any(key.startswith("weather#") for key in table.items)
 
 
+def test_airkorea_error_code_is_not_cached(fake_upstream, table):
+    overrides, _ = fake_upstream
+    overrides["getNearbyMsrstnList"] = {
+        "response": {
+            "header": {"resultCode": "22", "resultMsg": "LIMITED_NUMBER_OF_SERVICE_REQUESTS"},
+            "body": {"items": None},
+        }
+    }
+
+    _, body = _get("/api/conditions", lat="37.6199", lon="127.0630")
+
+    assert body["air"] is None
+    assert not any(key.startswith("stations#") for key in table.items)
+
+
 def test_without_table_env_cache_is_skipped(fake_upstream, monkeypatch):
     monkeypatch.delenv("CACHE_TABLE", raising=False)
     monkeypatch.setattr(cache, "_table", lambda: pytest.fail("table must not be used"))
