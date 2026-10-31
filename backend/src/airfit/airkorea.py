@@ -4,6 +4,7 @@ import os
 
 from airfit import upstream
 from airfit.timeutil import from_airkorea
+from airfit.upstream import UpstreamError
 
 BASE_URL = "https://apis.data.go.kr/B552584"
 
@@ -13,6 +14,12 @@ def _params(**extra) -> dict:
 
 
 def _items(data: dict) -> list[dict]:
+    # 오류도 HTTP 200에 items: null로 오므로, 빈 결과로 캐시되지 않게 resultCode로 실패를 가른다
+    code = data["response"]["header"]["resultCode"]
+    if code == "03":  # NODATA_ERROR
+        return []
+    if code != "00":
+        raise UpstreamError(f"에어코리아 resultCode {code}")
     return data["response"]["body"]["items"] or []
 
 
@@ -61,9 +68,13 @@ def summarize(station: dict, item: dict) -> dict:
 
 
 def fetch_air(tm_x: float, tm_y: float) -> dict | None:
+    return find_air(nearby_stations(tm_x, tm_y))
+
+
+def find_air(stations: list[dict], get_realtime=realtime) -> dict | None:
     """가까운 측정소부터 미세먼지 값이 있는 곳을 찾는다. 모두 비어 있으면 None."""
-    for station in nearby_stations(tm_x, tm_y):
-        item = realtime(station["stationName"])
+    for station in stations:
+        item = get_realtime(station["stationName"])
         if item is None:
             continue
         air = summarize(station, item)

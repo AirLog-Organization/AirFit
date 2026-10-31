@@ -42,6 +42,10 @@ Resources:
           KAKAO_REST_API_KEY: !Ref KakaoRestApiKey
           OPENWEATHER_API_KEY: !Ref OpenWeatherApiKey
           AIRKOREA_SERVICE_KEY: !Ref AirKoreaServiceKey
+          CACHE_TABLE: !Ref CacheTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CacheTable
       Events:
         Health:
           Type: HttpApi
@@ -61,6 +65,22 @@ Resources:
             ApiId: !Ref HttpApi
             Path: /api/conditions
             Method: GET
+
+  # 외부 API 응답 캐시. 이름을 비워 두면 airfit-backend-CacheTable-xxxx로 만들어져 실행 role 권한 범위에 들어간다
+  CacheTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+      # 만료 항목은 DynamoDB가 늦게 지우므로 읽을 때도 expiresAt을 확인한다
+      TimeToLiveSpecification:
+        AttributeName: expiresAt
+        Enabled: true
 
   # 프론트 빌드 결과물. 이름을 비워 두면 airfit-backend-frontendbucket-xxxx로 만들어져 실행 role 권한 범위에 들어간다
   FrontendBucket:
