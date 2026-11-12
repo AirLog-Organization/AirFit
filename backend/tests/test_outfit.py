@@ -1,6 +1,6 @@
 import pytest
 
-from airfit.outfit import CATEGORIES, load_rules, recommend
+from airfit.outfit import CATEGORIES, THICKNESSES, load_rules, recommend
 from airfit.rule_engine import is_valid_condition
 
 
@@ -43,6 +43,28 @@ def test_rules_file_is_valid():
         item for tip in rules["tips"] for item in tip.get("items", [])
     ]
     assert {item["category"] for item in all_items} <= CATEGORIES
+
+
+def test_wardrobe_wear_rules_are_valid():
+    for band in load_rules()["bands"]:
+        wear = band["wear"]
+        # 신발과 소품은 두께로 고르지 않는다
+        assert set(wear) <= {"outer", "top", "bottom"}
+        assert {"top", "bottom"} <= set(wear)
+        for thicknesses in wear.values():
+            assert thicknesses
+            assert set(thicknesses) <= THICKNESSES
+            assert len(thicknesses) == len(set(thicknesses))
+
+
+def test_wear_gets_thicker_as_it_gets_colder():
+    order = {"thin": 0, "medium": 1, "thick": 2}
+    bands = load_rules()["bands"]
+
+    # 얇은 옷도 허용하는 구간이 있어서, 허용하는 가장 두꺼운 옷이 추워질수록 줄지 않는지 본다
+    for category in ("top", "bottom"):
+        thickest = [max(order[t] for t in band["wear"][category]) for band in bands]
+        assert thickest == sorted(thickest)
 
 
 @pytest.mark.parametrize(

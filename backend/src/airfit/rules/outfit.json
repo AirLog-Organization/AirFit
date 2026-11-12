@@ -7,7 +7,8 @@
         { "category": "top", "name": "반팔 티셔츠" },
         { "category": "bottom", "name": "반바지" },
         { "category": "shoes", "name": "샌들" }
-      ]
+      ],
+      "wear": { "top": ["thin"], "bottom": ["thin"] }
     },
     {
       "min": 23,
@@ -16,7 +17,8 @@
         { "category": "top", "name": "반팔 티셔츠" },
         { "category": "bottom", "name": "면바지" },
         { "category": "shoes", "name": "운동화" }
-      ]
+      ],
+      "wear": { "top": ["thin"], "bottom": ["thin", "medium"] }
     },
     {
       "min": 20,
@@ -25,7 +27,8 @@
         { "category": "outer", "name": "얇은 가디건" },
         { "category": "top", "name": "긴팔 티셔츠" },
         { "category": "bottom", "name": "면바지" }
-      ]
+      ],
+      "wear": { "outer": ["thin"], "top": ["thin"], "bottom": ["medium", "thin"] }
     },
     {
       "min": 17,
@@ -33,7 +36,8 @@
       "items": [
         { "category": "top", "name": "맨투맨" },
         { "category": "bottom", "name": "청바지" }
-      ]
+      ],
+      "wear": { "top": ["medium"], "bottom": ["medium"] }
     },
     {
       "min": 12,
@@ -42,7 +46,8 @@
         { "category": "outer", "name": "가벼운 재킷" },
         { "category": "top", "name": "긴팔 티셔츠" },
         { "category": "bottom", "name": "청바지" }
-      ]
+      ],
+      "wear": { "outer": ["thin", "medium"], "top": ["thin", "medium"], "bottom": ["medium"] }
     },
     {
       "min": 9,
@@ -51,7 +56,8 @@
         { "category": "outer", "name": "트렌치코트" },
         { "category": "top", "name": "니트" },
         { "category": "bottom", "name": "청바지" }
-      ]
+      ],
+      "wear": { "outer": ["medium"], "top": ["medium"], "bottom": ["medium"] }
     },
     {
       "min": 5,
@@ -61,7 +67,12 @@
         { "category": "top", "name": "니트" },
         { "category": "top", "name": "내복" },
         { "category": "bottom", "name": "두꺼운 바지" }
-      ]
+      ],
+      "wear": {
+        "outer": ["medium", "thick"],
+        "top": ["medium", "thick"],
+        "bottom": ["thick", "medium"]
+      }
     },
     {
       "min": null,
@@ -71,7 +82,8 @@
         { "category": "top", "name": "두꺼운 니트" },
         { "category": "bottom", "name": "기모 바지" },
         { "category": "accessory", "name": "목도리" }
-      ]
+      ],
+      "wear": { "outer": ["thick"], "top": ["thick", "medium"], "bottom": ["thick"] }
     }
   ],
   "tips": [
@@ -96,5 +108,9 @@
       ],
       "text": "바람이 강해 실제보다 춥게 느껴질 수 있어요. 바람을 막는 겉옷을 입으세요."
     }
-  ]
+  ],
+  "waterproof": {
+    "when": [{ "metric": "rainChance", "gte": 60 }],
+    "categories": ["outer", "shoes"]
+  }
 }

@@ -39,18 +39,60 @@
 - 바람 팁은 "춥게 느껴질 수 있다"는 내용이라, 더운 날에 붙지 않도록 체감온도가 20도(선선한 구간) 미만일 때만 보여 줍니다.
 - 일교차, 강수 확률, 풍속, 체감온도 기준값은 팀이 정한 값입니다.
 
+## 옷장 추천
+
+사용자가 브라우저에 등록한 옷장에서 오늘 입을 옷을 고릅니다. 코드는 `outfit.recommend_from_wardrobe`이고, 옷장 추천 API(`/api/wardrobe/recommend`)에 연결할 예정입니다. 옷장은 서버에 저장하지 않습니다.
+
+옷 하나는 아래 값을 가집니다.
+
+| 필드 | 설명 |
+| --- | --- |
+| `id` | 옷장 항목 id. 추천 결과에 그대로 붙어 화면이 어떤 옷인지 알 수 있습니다 |
+| `category` | `outer`, `top`, `bottom`, `shoes`, `accessory` 중 하나 |
+| `name` | 사용자가 붙인 이름 |
+| `thickness` | `thin`, `medium`, `thick` 중 하나 |
+| `waterproof` | 방수 여부 |
+
+### 고르는 순서
+
+1. 기본 옷차림과 같은 체감온도 구간을 고릅니다. 요약 문구와 팁은 기본 옷차림과 같습니다.
+2. 겉옷, 상의, 하의는 구간의 맞는 두께(`wear`)를 앞에서부터 확인해 처음 맞는 옷을 고릅니다. 두께가 같으면 먼저 등록한 옷입니다.
+3. 맞는 옷이 없는 종류는 기본 옷차림의 옷을 `id` 없이 넣습니다. 화면에서 "옷장에 없는 옷"으로 구분할 수 있습니다.
+4. 신발과 소품, 팁에 딸린 소품(우산, 마스크)은 기본 옷차림을 그대로 씁니다.
+5. 비 소식이 있으면(앞으로 12시간 강수 확률 60% 이상, 또는 지금 비나 눈) 같은 두께 안에서 방수 겉옷을 먼저 고르고, 옷장에 방수 신발이 있으면 기본 신발 대신 넣습니다. 두께 순서보다 방수를 앞세우지는 않습니다.
+
+종류나 두께가 빠진 옷은 고르지 않습니다. 날씨 조회에 실패하면 결과는 `null`입니다.
+
+### 구간별 맞는 두께
+
+앞에 적은 두께를 먼저 고릅니다. 비어 있는 칸은 그 종류를 추천하지 않는다는 뜻입니다.
+
+| 체감온도 | 겉옷 | 상의 | 하의 |
+| --- | --- | --- | --- |
+| 28도 이상 | | thin | thin |
+| 23 ~ 27도 | | thin | thin, medium |
+| 20 ~ 22도 | thin | thin | medium, thin |
+| 17 ~ 19도 | | medium | medium |
+| 12 ~ 16도 | thin, medium | thin, medium | medium |
+| 9 ~ 11도 | medium | medium | medium |
+| 5 ~ 8도 | medium, thick | medium, thick | thick, medium |
+| 5도 미만 | thick | thick, medium | thick |
+
+기본 옷차림 표에 맞춰 팀이 정한 값입니다.
+
 ## 규칙 파일 구조
 
 ```json
 {
   "bands": [
-    { "min": 28, "summary": "...", "items": [{ "category": "top", "name": "반팔 티셔츠" }] },
-    { "min": null, "summary": "...", "items": [] }
+    { "min": 28, "summary": "...", "items": [{ "category": "top", "name": "반팔 티셔츠" }], "wear": { "top": ["thin"], "bottom": ["thin"] } },
+    { "min": null, "summary": "...", "items": [], "wear": { "outer": ["thick"], "top": ["thick", "medium"], "bottom": ["thick"] } }
   ],
   "tips": [
     { "when": [{ "metric": "rainChance", "gte": 60 }], "text": "...", "items": [{ "category": "accessory", "name": "우산" }] },
     { "when": [{ "metric": "windSpeed", "gte": 7 }, { "metric": "feelsLike", "lt": 20 }], "text": "..." }
-  ]
+  ],
+  "waterproof": { "when": [{ "metric": "rainChance", "gte": 60 }], "categories": ["outer", "shoes"] }
 }
 ```
 
@@ -62,5 +104,8 @@
 | `tips[].when[].metric` | `feelsLike`(체감온도), `humidity`(습도), `precipitation`(최근 1시간 강수량), `dailyRange`(일교차), `rainChance`(강수 확률), `dustGrade`(미세먼지 등급), `windSpeed`(풍속) 중 하나. 자세한 뜻은 [`life-indices.md`](life-indices.md)의 "규칙 파일 구조" |
 | `tips[].when[].gte`, `lt` | 둘 중 하나. `gte`는 이 값 이상, `lt`는 이 값 미만일 때 맞습니다 |
 | `tips[].items` | 선택. 팁과 함께 추천할 소품 |
+| `bands[].wear` | 옷장 추천에서 구간별로 맞는 두께. 키는 `outer`, `top`, `bottom`(상의와 하의는 필수), 값은 `thin`, `medium`, `thick`을 선호 순서대로 적은 목록 |
+| `waterproof.when` | 이 조건이 모두 맞으면 비 소식이 있다고 보고 방수 옷을 앞세웁니다. 형식은 `tips[].when`과 같습니다 |
+| `waterproof.categories` | 방수를 앞세울 종류. `outer`, `shoes` 중에서 고릅니다 |
 
-`backend/tests/test_outfit.py`가 구간 순서, `category` 값, `metric` 이름, 비교 연산자를 검사하므로, 규칙을 고친 뒤 `pytest`로 확인해 주세요. 기여 절차는 [CONTRIBUTING.md](../CONTRIBUTING.md)의 "규칙(JSON) 기여"를 따릅니다.
+`backend/tests/test_outfit.py`와 `test_wardrobe.py`가 구간 순서, `category` 값, 두께 값, `metric` 이름, 비교 연산자를 검사하므로, 규칙을 고친 뒤 `pytest`로 확인해 주세요. 기여 절차는 [CONTRIBUTING.md](../CONTRIBUTING.md)의 "규칙(JSON) 기여"를 따릅니다.
