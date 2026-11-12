@@ -13,8 +13,16 @@ def _weather(feels: float = 15.0, **overrides) -> dict:
     return {**weather, **overrides}
 
 
-def _cloth(id: str, category: str, thickness: str, name: str | None = None) -> dict:
-    return {"id": id, "category": category, "name": name or id, "thickness": thickness}
+def _cloth(
+    id: str, category: str, thickness: str, name: str | None = None, waterproof: bool = False
+) -> dict:
+    return {
+        "id": id,
+        "category": category,
+        "name": name or id,
+        "thickness": thickness,
+        "waterproof": waterproof,
+    }
 
 
 def _by_category(outfit: dict) -> dict[str, list[dict]]:
@@ -97,6 +105,60 @@ def test_items_without_category_or_thickness_are_ignored():
     outfit = recommend_from_wardrobe(_weather(), wardrobe=wardrobe)
 
     assert all("id" not in item for item in outfit["items"])
+
+
+def test_rules_file_has_valid_waterproof_rule():
+    from airfit.outfit import load_rules
+    from airfit.rule_engine import is_valid_condition
+
+    rule = load_rules()["waterproof"]
+
+    assert rule["when"]
+    assert all(is_valid_condition(condition) for condition in rule["when"])
+    assert set(rule["categories"]) <= {"outer", "shoes"}
+
+
+def test_rain_prefers_waterproof_outer_within_same_thickness():
+    wardrobe = [
+        _cloth("plain", "outer", "thin", "가디건"),
+        _cloth("rain", "outer", "thin", "바람막이", waterproof=True),
+    ]
+
+    sunny = _by_category(recommend_from_wardrobe(_weather(), wardrobe=wardrobe))
+    rainy = _by_category(
+        recommend_from_wardrobe(_weather(), hourly=[{"pop": 70}], wardrobe=wardrobe)
+    )
+
+    assert sunny["outer"][0]["id"] == "plain"
+    assert rainy["outer"][0]["id"] == "rain"
+
+
+def test_rain_does_not_override_thickness_preference():
+    # 15도에서는 thin이 먼저라, 방수인 medium보다 thin 겉옷을 고른다
+    wardrobe = [
+        _cloth("thin", "outer", "thin"),
+        _cloth("rain", "outer", "medium", waterproof=True),
+    ]
+
+    outfit = recommend_from_wardrobe(_weather(), hourly=[{"pop": 70}], wardrobe=wardrobe)
+
+    assert _by_category(outfit)["outer"][0]["id"] == "thin"
+
+
+def test_rain_uses_waterproof_shoes_from_wardrobe():
+    wardrobe = [
+        _cloth("sneakers", "shoes", "thin", "운동화"),
+        _cloth("boots", "shoes", "thin", "레인부츠", waterproof=True),
+    ]
+
+    rainy = recommend_from_wardrobe(_weather(25.0, precipitation=0.3), wardrobe=wardrobe)
+    sunny = recommend_from_wardrobe(_weather(25.0), wardrobe=wardrobe)
+
+    assert _by_category(rainy)["shoes"] == [
+        {"id": "boots", "category": "shoes", "name": "레인부츠"}
+    ]
+    # 맑은 날 신발은 지금처럼 일반 추천을 쓴다
+    assert _by_category(sunny)["shoes"] == [{"category": "shoes", "name": "운동화"}]
 
 
 def test_no_recommendation_without_weather():

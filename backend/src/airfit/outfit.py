@@ -42,13 +42,29 @@ def recommend(weather: dict | None, air: dict | None = None, hourly: list | None
     return {"summary": band["summary"], "items": items, "tips": tips}
 
 
-def _pick(wardrobe: list, category: str, thicknesses: list[str]) -> dict | None:
-    """두께 선호 순서대로 처음 맞는 옷. 같은 두께면 옷장에 먼저 등록한 옷을 고른다."""
+def _pick(
+    wardrobe: list, category: str, thicknesses: list[str], waterproof_first: bool = False
+) -> dict | None:
+    """두께 선호 순서대로 처음 맞는 옷. 같은 두께면 옷장에 먼저 등록한 옷을 고른다.
+
+    waterproof_first면 같은 두께 안에서 방수 옷을 먼저 고른다.
+    """
     for thickness in thicknesses:
-        for item in wardrobe:
-            if item.get("category") == category and item.get("thickness") == thickness:
-                return item
+        matches = [
+            item
+            for item in wardrobe
+            if item.get("category") == category and item.get("thickness") == thickness
+        ]
+        if waterproof_first:
+            # sorted는 순서가 안정적이라 방수 옷끼리, 아닌 옷끼리는 등록 순서가 유지된다
+            matches = sorted(matches, key=lambda item: not item.get("waterproof"))
+        if matches:
+            return matches[0]
     return None
+
+
+def _wardrobe_item(item: dict, category: str) -> dict:
+    return {"id": item["id"], "category": category, "name": item["name"]}
 
 
 def recommend_from_wardrobe(
@@ -60,21 +76,37 @@ def recommend_from_wardrobe(
     """옷장(브라우저에만 저장된 옷 목록)에서 구간의 wear에 맞는 겉옷, 상의, 하의를 고른다.
 
     고른 옷에는 옷장 항목의 id를 붙인다. 맞는 옷이 없는 종류는 일반 추천의 옷을 id 없이 넣고,
-    신발, 소품, 팁은 일반 추천을 그대로 쓴다. 날씨가 없으면 None.
+    신발, 소품, 팁은 일반 추천을 그대로 쓴다. 비 소식이 있으면(규칙의 waterproof.when)
+    방수 겉옷을 먼저 고르고, 옷장에 방수 신발이 있으면 일반 추천 신발 대신 넣는다.
+    날씨가 없으면 None.
     """
     base = recommend(weather, air, hourly)
     if base is None:
         return None
 
+    rules = load_rules()
     band = _band(rule_engine.feels_like(weather))
     wardrobe = wardrobe or []
+    values = rule_engine.metrics(weather, air, hourly)
+    rainy = rule_engine.matches(rules["waterproof"]["when"], values)
+    waterproof_categories = set(rules["waterproof"]["categories"]) if rainy else set()
+
     items = []
     for category, thicknesses in band["wear"].items():
-        picked = _pick(wardrobe, category, thicknesses)
+        picked = _pick(wardrobe, category, thicknesses, category in waterproof_categories)
         if picked is not None:
-            items.append({"id": picked["id"], "category": category, "name": picked["name"]})
+            items.append(_wardrobe_item(picked, category))
         else:
             items.extend(dict(item) for item in band["items"] if item["category"] == category)
-    items.extend(item for item in base["items"] if item["category"] not in band["wear"])
+    rest = [item for item in base["items"] if item["category"] not in band["wear"]]
 
-    return {"summary": base["summary"], "items": items, "tips": base["tips"]}
+    # 신발은 두께로 고르지 않으므로, 비 올 때 방수 신발만 옷장에서 고른다
+    shoes = next(
+        (item for item in wardrobe if item.get("category") == "shoes" and item.get("waterproof")),
+        None,
+    )
+    if "shoes" in waterproof_categories and shoes is not None:
+        rest = [item for item in rest if item["category"] != "shoes"]
+        rest.insert(0, _wardrobe_item(shoes, "shoes"))
+
+    return {"summary": base["summary"], "items": items + rest, "tips": base["tips"]}

@@ -108,5 +108,9 @@
       ],
       "text": "바람이 강해 실제보다 춥게 느껴질 수 있어요. 바람을 막는 겉옷을 입으세요."
     }
-  ]
+  ],
+  "waterproof": {
+    "when": [{ "metric": "rainChance", "gte": 60 }],
+    "categories": ["outer", "shoes"]
+  }
 }
