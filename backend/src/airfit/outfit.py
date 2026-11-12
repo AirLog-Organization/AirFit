@@ -6,6 +6,8 @@
 from airfit import rule_engine
 
 CATEGORIES = {"outer", "top", "bottom", "shoes", "accessory"}
+# 옷장 항목의 두께. 구간별 wear에 이 값으로 맞는 두께를 적는다
+THICKNESSES = {"thin", "medium", "thick"}
 
 
 def load_rules() -> dict:
