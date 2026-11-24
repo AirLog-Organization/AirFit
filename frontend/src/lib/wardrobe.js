@@ -53,4 +53,7 @@ export function addItem(items, { category, name, thickness, waterproof }) {
 }
 
 export function removeItem(items, id) {
+  const next = items.filter((item) => item.id !== id)
+  save(next)
+  return next
 }
