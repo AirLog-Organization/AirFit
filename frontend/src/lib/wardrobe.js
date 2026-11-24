@@ -50,6 +50,10 @@ export function loadWardrobe() {
 }
 
 export function addItem(items, { category, name, thickness, waterproof }) {
+  const item = { id: crypto.randomUUID(), category, name: name.trim(), thickness, waterproof }
+  const next = [...items, item]
+  save(next)
+  return next
 }
 
 export function removeItem(items, id) {
