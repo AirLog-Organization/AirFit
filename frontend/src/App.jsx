@@ -6,6 +6,7 @@ import HourlyCard from './components/HourlyCard'
 import IndexCards from './components/IndexCards'
 import OutfitCard from './components/OutfitCard'
 import RegionSearch from './components/RegionSearch'
+import WardrobeCard from './components/WardrobeCard'
 import WeatherCard from './components/WeatherCard'
 import { loadSavedRegion, saveRegion } from './lib/savedRegion'
 import { applyTheme, initialTheme, saveTheme } from './lib/theme'
@@ -217,6 +218,8 @@ function App() {
             <IndexCards indices={conditions.indices} />
           </>
         )}
+
+        <WardrobeCard />
 
         {/* 이용 조건상 필수 출처 표기 (README의 데이터 출처와 이용 조건) */}
         <footer className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400">
