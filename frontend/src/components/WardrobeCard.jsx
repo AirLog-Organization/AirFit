@@ -24,6 +24,15 @@ function WardrobeCard() {
   const [error, setError] = useState('')
 
   function handleSubmit(event) {
+    event.preventDefault()
+    if (name.trim() === '') {
+      setError('옷 이름을 적어 주세요.')
+      return
+    }
+    setItems(addItem(items, { category, name, thickness, waterproof }))
+    setName('')
+    setWaterproof(false)
+    setError('')
   }
 
   return (
