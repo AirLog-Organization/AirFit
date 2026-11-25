@@ -43,9 +43,15 @@ function WardrobeCard() {
     setError('')
   }
 
-  function startEdit(item) {
+    function startEdit(item) {
+    setEditingId(item.id)
+    setCategory(item.category)
+    setName(item.name)
+    setThickness(item.thickness)
+    setWaterproof(item.waterproof)
+    setError('')
   }
-
+  
   function handleRemove(id) {
     setItems(removeItem(items, id))
     if (id === editingId) resetForm()
