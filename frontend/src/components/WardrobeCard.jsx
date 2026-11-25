@@ -32,9 +32,10 @@ function WardrobeCard() {
       return
     }
     const fields = { category, name, thickness, waterproof }
-        if (editingId) {
+if (editingId) {
       setItems(updateItem(items, editingId, fields))
-    } else {
+    } 
+else {
       setItems(addItem(items, fields))
     }
     resetForm()
@@ -47,7 +48,7 @@ function WardrobeCard() {
     setError('')
   }
 
-    function startEdit(item) {
+function startEdit(item) {
     setEditingId(item.id)
     setCategory(item.category)
     setName(item.name)
@@ -55,7 +56,7 @@ function WardrobeCard() {
     setWaterproof(item.waterproof)
     setError('')
   }
-  
+
   function handleRemove(id) {
     setItems(removeItem(items, id))
     if (id === editingId) resetForm()
