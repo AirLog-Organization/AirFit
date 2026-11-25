@@ -61,3 +61,6 @@ export function removeItem(items, id) {
   save(next)
   return next
 }
+
+export function updateItem(items, id, { category, name, thickness, waterproof }) {
+}
