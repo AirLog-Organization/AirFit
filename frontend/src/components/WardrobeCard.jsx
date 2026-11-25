@@ -32,7 +32,11 @@ function WardrobeCard() {
       return
     }
     const fields = { category, name, thickness, waterproof }
-    setItems(addItem(items, fields))
+        if (editingId) {
+      setItems(updateItem(items, editingId, fields))
+    } else {
+      setItems(addItem(items, fields))
+    }
     resetForm()
   }
 
