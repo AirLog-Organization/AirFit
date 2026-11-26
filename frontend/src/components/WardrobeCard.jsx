@@ -1,5 +1,6 @@
 import { Check, Pencil, Plus, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { classifyClothing } from '../api'
 import {
   addItem,
   CATEGORIES,
@@ -25,6 +26,27 @@ function WardrobeCard({ location }) {
   const [waterproof, setWaterproof] = useState(false)
   const [error, setError] = useState('')
   const [editingId, setEditingId] = useState(null)
+  const [guessNote, setGuessNote] = useState('')
+  // 분류 답이 늦게 오면 그사이 바뀐 이름에 덮어쓰지 않도록 마지막으로 물어본 이름을 기억한다
+  const askedName = useRef('')
+
+  // 새 옷을 넣을 때만, 이름 칸을 벗어나면 이름으로 종류, 두께, 방수를 추정해 미리 채운다
+  function guessFromName() {
+    const trimmed = name.trim()
+    if (editingId || trimmed === '' || trimmed === askedName.current) return
+    askedName.current = trimmed
+    classifyClothing(trimmed)
+      .then((guess) => {
+        if (askedName.current !== trimmed) return
+        if (guess.category) setCategory(guess.category)
+        setThickness(guess.thickness)
+        setWaterproof(guess.waterproof)
+        setGuessNote('이름으로 추정해 채웠어요. 맞지 않으면 고쳐 주세요.')
+      })
+      .catch(() => {
+        // 추정은 돕는 기능이라 실패해도 사용자가 직접 고르면 된다
+      })
+  }
 
   function handleSubmit(event) {
     event.preventDefault()
@@ -43,6 +65,8 @@ function WardrobeCard({ location }) {
 
   function resetForm() {
     setEditingId(null)
+    setGuessNote('')
+    askedName.current = ''
     setName('')
     setWaterproof(false)
     setError('')
@@ -55,6 +79,7 @@ function WardrobeCard({ location }) {
     setThickness(item.thickness)
     setWaterproof(item.waterproof)
     setError('')
+    setGuessNote('')
   }
 
   function handleRemove(id) {
@@ -80,6 +105,7 @@ function WardrobeCard({ location }) {
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
+            onBlur={guessFromName}
             maxLength={NAME_MAX}
             placeholder="예: 회색 니트"
             className={FIELD}
@@ -124,6 +150,9 @@ function WardrobeCard({ location }) {
           </button>
         )}
       </form>
+      {guessNote && (
+        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{guessNote}</p>
+      )}
       {error && (
         <p role="alert" className="mt-2 text-sm text-rose-600 dark:text-rose-300">
           {error}
