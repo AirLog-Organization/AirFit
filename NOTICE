@@ -174,5 +174,6 @@ requirements are described in README.md.
 - OpenWeather (openweathermap.org)
 - Kakao Local API, Kakao Corp., via Kakao Developers (developers.kakao.com).
   AirFit is not affiliated with or endorsed by Kakao.
-- Claude (Anthropic) on Amazon Bedrock, for clothing classification. Turned
-  off unless the LlmClassify deployment parameter is enabled.
+- Claude (Anthropic) on Amazon Bedrock, for clothing classification and the
+  chat assistant. Turned off unless the LlmClassify or LlmChat deployment
+  parameter is enabled.
