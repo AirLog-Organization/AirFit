@@ -62,3 +62,8 @@ export function recommendFromWardrobe({ lat, lon }, wardrobe, signal) {
 export function classifyClothing(name, signal) {
   return postJson('/api/wardrobe/classify', { name }, signal)
 }
+
+// 대화 기록은 보내지 않고 질문마다 따로 묻는다 (docs/chat.md)
+export function askChat({ lat, lon }, message, signal) {
+  return postJson('/api/chat', { lat, lon, message }, signal)
+}
