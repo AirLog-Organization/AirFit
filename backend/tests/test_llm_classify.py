@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from airfit import llm_classify
+from airfit import bedrock, llm_classify
 
 
 class FakeMessages:
@@ -95,7 +95,7 @@ def test_call_failure_returns_none_without_logging_the_name(caplog):
 
 def test_disabled_by_default_and_never_builds_a_client(monkeypatch):
     monkeypatch.delenv("LLM_CLASSIFY", raising=False)
-    monkeypatch.setattr(llm_classify, "_client", lambda: pytest.fail("must not build a client"))
+    monkeypatch.setattr(bedrock, "client", lambda: pytest.fail("must not build a client"))
 
     assert llm_classify.enabled() is False
     assert llm_classify.classify("코트") is None
@@ -104,7 +104,7 @@ def test_disabled_by_default_and_never_builds_a_client(monkeypatch):
 def test_enabled_uses_bedrock_client(monkeypatch):
     client = _client(text=_json())
     monkeypatch.setenv("LLM_CLASSIFY", "enabled")
-    monkeypatch.setattr(llm_classify, "_client", lambda: client)
+    monkeypatch.setattr(bedrock, "client", lambda: client)
 
     assert llm_classify.classify("코트")["category"] == "outer"
     assert len(client.messages.calls) == 1
