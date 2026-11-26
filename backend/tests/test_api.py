@@ -181,22 +181,35 @@ def test_flagged_pollutant_becomes_null():
     assert air["pm10"]["value"] == 43
 
 
-def test_weather_today_range_uses_kst_dates():
+def test_weather_range_covers_next_24_hours():
     current = load_fixture("openweather_current")
     forecast = load_fixture("openweather_forecast")
-    now = datetime(2026, 10, 29, 11, 0, tzinfo=KST)
 
-    weather, hourly = openweather.summarize(current, forecast, now)
+    weather, hourly = openweather.summarize(current, forecast)
 
-    today = [
-        item["main"]["temp"]
-        for item in forecast["list"]
-        if datetime.fromtimestamp(item["dt"], KST).date() == now.date()
-    ]
-    assert weather["tempMin"] == min([current["main"]["temp"], *today])
-    assert weather["tempMax"] == max([current["main"]["temp"], *today])
+    temps = [current["main"]["temp"], *(item["main"]["temp"] for item in forecast["list"][:8])]
+    assert weather["tempMin"] == min(temps)
+    assert weather["tempMax"] == max(temps)
     assert hourly[0]["time"].endswith("+09:00")
     assert 0 <= hourly[0]["pop"] <= 100
+
+
+def test_weather_range_at_night_includes_tomorrow():
+    # 22시 조회: 오늘 남은 예보가 없어도 내일 낮 기온까지 범위에 들어가야 한다 (#35)
+    current = load_fixture("openweather_current")
+    current["main"]["temp"] = 6.8
+    forecast = load_fixture("openweather_forecast")
+    start = int(datetime(2026, 11, 1, 22, 0, tzinfo=KST).timestamp())
+    temps = [6.0, 5.1, 4.6, 5.9, 11.2, 15.98, 13.4, 9.0]
+    for index, (item, temp) in enumerate(zip(forecast["list"], temps, strict=False)):
+        item["dt"] = start + index * 3 * 3600
+        item["main"]["temp"] = temp
+
+    weather, hourly = openweather.summarize(current, forecast)
+
+    assert weather["tempMin"] == 4.6
+    assert weather["tempMax"] == 15.98
+    assert max(hour["temp"] for hour in hourly) == weather["tempMax"]
 
 
 def test_weather_precipitation_defaults_to_zero():

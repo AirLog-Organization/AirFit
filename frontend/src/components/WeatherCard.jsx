@@ -17,7 +17,7 @@ function WeatherCard({ weather }) {
 
   const details = [
     ['체감', `${round(weather.feelsLike)}°`],
-    ['최저/최고', `${round(weather.tempMin)}° / ${round(weather.tempMax)}°`],
+    ['24시간 최저/최고', `${round(weather.tempMin)}° / ${round(weather.tempMax)}°`],
     ['습도', `${weather.humidity ?? '-'}%`],
     ['바람', `${weather.windSpeed ?? '-'}m/s`],
     ['강수(1시간)', `${weather.precipitation ?? 0}mm`],

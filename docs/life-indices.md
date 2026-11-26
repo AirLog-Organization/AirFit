@@ -109,7 +109,7 @@
 | `feelsLike` | 체감온도. 없으면 기온 |
 | `humidity` | 습도(%) |
 | `precipitation` | 최근 1시간 강수량(mm, 비와 눈 합산) |
-| `dailyRange` | 일교차(오늘 최고 - 최저) |
+| `dailyRange` | 일교차. 앞으로 24시간(현재 기온과 3시간 간격 예보 8개)의 최고 - 최저 |
 | `rainChance` | 앞으로 12시간 예보의 최대 강수 확률(%). 지금 비나 눈이 오면 100 |
 | `dustGrade` | 미세먼지와 초미세먼지 등급 중 나쁜 쪽 |
 | `windSpeed` | 풍속(m/s) |
