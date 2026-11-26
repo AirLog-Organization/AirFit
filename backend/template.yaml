@@ -29,7 +29,8 @@ Resources:
     Type: AWS::Serverless::HttpApi
     Properties:
       CorsConfiguration:
-        AllowMethods: [GET, OPTIONS]
+        AllowMethods: [GET, POST, OPTIONS]
+        AllowHeaders: [content-type]
         AllowOrigins: ["*"]
 
   ApiFunction:
@@ -65,6 +66,12 @@ Resources:
             ApiId: !Ref HttpApi
             Path: /api/conditions
             Method: GET
+        WardrobeRecommend:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/wardrobe/recommend
+            Method: POST
 
   # 외부 API 응답 캐시. 이름을 비워 두면 airfit-backend-CacheTable-xxxx로 만들어져 실행 role 권한 범위에 들어간다
   CacheTable:
@@ -128,7 +135,8 @@ Resources:
           - PathPattern: /api/*
             TargetOriginId: api
             ViewerProtocolPolicy: redirect-to-https
-            AllowedMethods: [GET, HEAD, OPTIONS]
+            # 옷장 추천이 POST라 전체 메서드를 허용한다. CloudFront는 POST만 따로 고를 수 없다
+            AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
             CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # CachingDisabled
             OriginRequestPolicyId: b689b0a8-53d0-40ab-baf2-68738e2966ac # AllViewerExceptHostHeader
 
