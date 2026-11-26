@@ -22,6 +22,11 @@ Parameters:
     Type: String
     AllowedValues: [enabled, disabled]
     Default: disabled
+  # 챗봇에 Bedrock의 Claude를 쓸지. disabled면 오늘 옷차림을 요약한 규칙 기반 답을 준다
+  LlmChat:
+    Type: String
+    AllowedValues: [enabled, disabled]
+    Default: disabled
 
 Globals:
   Function:
@@ -38,6 +43,10 @@ Resources:
         AllowMethods: [GET, POST, OPTIONS]
         AllowHeaders: [content-type]
         AllowOrigins: ["*"]
+      # 챗봇 등 LLM 호출 비용이 갑자기 늘지 않도록 API 전체의 초당 요청 수를 묶는다
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 40
+        ThrottlingRateLimit: 20
 
   ApiFunction:
     Type: AWS::Serverless::Function
@@ -51,6 +60,7 @@ Resources:
           AIRKOREA_SERVICE_KEY: !Ref AirKoreaServiceKey
           CACHE_TABLE: !Ref CacheTable
           LLM_CLASSIFY: !Ref LlmClassify
+          LLM_CHAT: !Ref LlmChat
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CacheTable
@@ -89,6 +99,12 @@ Resources:
           Properties:
             ApiId: !Ref HttpApi
             Path: /api/wardrobe/classify
+            Method: POST
+        Chat:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/chat
             Method: POST
 
   # 외부 API 응답 캐시. 이름을 비워 두면 airfit-backend-CacheTable-xxxx로 만들어져 실행 role 권한 범위에 들어간다

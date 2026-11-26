@@ -5,7 +5,7 @@ import binascii
 import json
 import logging
 
-from airfit import cache, classify, kakao, llm_classify, outfit
+from airfit import cache, chat, classify, kakao, llm_chat, llm_classify, outfit
 from airfit.conditions import AllSourcesFailed, get_conditions
 from airfit.upstream import UpstreamError
 
@@ -23,6 +23,8 @@ MAX_BODY_BYTES = 64 * 1024
 MAX_WARDROBE_ITEMS = 200
 MAX_ITEM_ID_LENGTH = 64
 MAX_ITEM_NAME_LENGTH = 50
+# 챗봇 질문 길이. 날씨와 옷차림 질문에는 충분하고 LLM 비용을 묶어 둔다
+MAX_CHAT_MESSAGE_LENGTH = 200
 
 
 def _response(status: int, body: dict) -> dict:
@@ -144,11 +146,38 @@ def _wardrobe_classify(event: dict) -> dict:
     return _response(200, {**classify.classify(name), "source": "rules"})
 
 
+def _chat(event: dict) -> dict:
+    # 질문은 사용자 입력이라 로그에 남기지 않는다
+    body = _json_body(event)
+    if body is None:
+        return _error(400, "invalid_params", "요청 본문은 JSON 객체여야 합니다.")
+    coordinates = _coordinates(body.get("lat"), body.get("lon"))
+    if isinstance(coordinates, dict):
+        return coordinates
+    message = body.get("message")
+    if not isinstance(message, str) or not 0 < len(message.strip()) <= MAX_CHAT_MESSAGE_LENGTH:
+        return _error(
+            400, "invalid_params", f"message는 1~{MAX_CHAT_MESSAGE_LENGTH}자의 질문이어야 합니다."
+        )
+
+    try:
+        conditions = get_conditions(*coordinates)
+    except AllSourcesFailed:
+        return _error(502, "upstream_error", "날씨와 대기질 정보를 잠시 불러오지 못했어요.")
+    # source는 답을 만든 방법. LLM(Bedrock)을 먼저 쓰고, 꺼져 있거나 실패하면 규칙 기반 요약을 쓴다
+    answer = llm_chat.answer(message, conditions)
+    if answer is not None:
+        return _response(200, {"answer": answer, "source": "llm"})
+    return _response(200, {"answer": chat.rule_answer(conditions), "source": "rules"})
+
+
 def lambda_handler(event: dict, context) -> dict:
     method = event["requestContext"]["http"]["method"]
     path = event["rawPath"]
     params = event.get("queryStringParameters") or {}
 
+    if method == "POST" and path == "/api/chat":
+        return _chat(event)
     if method == "POST" and path == "/api/wardrobe/recommend":
         return _wardrobe_recommend(event)
     if method == "POST" and path == "/api/wardrobe/classify":
