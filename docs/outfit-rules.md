@@ -53,7 +53,7 @@
 | `thickness` | `thin`, `medium`, `thick` 중 하나 | |
 | `waterproof` | 방수 여부 | `true` 또는 `false` |
 
-### API
+### 추천 API
 
 ```http
 POST /api/wardrobe/recommend
@@ -116,6 +116,39 @@ API는 형식이 맞지 않는 옷이 있으면 400으로 거절합니다. 함�
 | 5도 미만 | thick | thick, medium | thick |
 
 기본 옷차림 표에 맞춰 팀이 정한 값입니다.
+
+## 옷 분류
+
+옷장 등록 화면에서 옷 이름을 적으면 종류, 두께, 방수 여부를 미리 채워 주기 위한 추정입니다. 키워드는 [`backend/src/airfit/rules/wardrobe_classify.json`](../backend/src/airfit/rules/wardrobe_classify.json)에 있고, 코드는 `classify.py`입니다. 이름만 보고 추정하므로 틀릴 수 있어서, 화면에서 사용자가 고칠 수 있어야 합니다.
+
+### 추정 방법
+
+이름의 공백을 지우고(예: "롱 패딩" → "롱패딩") 키워드가 들어 있는지 봅니다.
+
+| 값 | 방법 | 예 |
+| --- | --- | --- |
+| `category` | 종류별 키워드 중 **가장 긴 키워드**가 맞은 종류. 길이가 같으면 규칙 파일에 먼저 적은 종류(겉옷, 상의, 하의, 신발, 소품 순). 맞는 키워드가 없으면 `null` | "레인부츠"는 "레인"보다 긴 "레인부츠"가 맞아 신발, "후드집업"은 "후드"(상의)와 "집업"(겉옷)이 같은 길이라 겉옷 |
+| `thickness` | 두꺼움(`thick`), 얇음(`thin`) 키워드 중 더 긴 쪽. 길이가 같으면 두꺼움. 둘 다 없으면 `medium` | "기모 바지"는 thick, "반팔 티셔츠"는 thin, "회색 니트"는 medium |
+| `waterproof` | 방수 키워드("방수", "레인", "장화", "우비", "고어텍스")가 하나라도 있으면 `true` | "방수 바람막이", "레인부츠" |
+
+키워드 목록은 팀이 자주 쓰는 옷 이름으로 정했습니다. 빠진 이름이 있으면 규칙 파일에 추가해 주세요.
+
+### 분류 API
+
+```http
+POST /api/wardrobe/classify
+Content-Type: application/json
+
+{ "name": "롱패딩" }
+```
+
+```json
+{ "category": "outer", "thickness": "thick", "waterproof": false, "source": "rules" }
+```
+
+- `name`은 앞뒤 공백을 뺀 1~50자 문자열입니다. 아니면 400 `invalid_params`입니다.
+- `source`는 추정 방법입니다. 지금은 키워드 규칙(`rules`)뿐이고, LLM 분류를 붙이면 그 결과를 다른 값으로 구분하고 LLM이 실패할 때 이 규칙을 대신 씁니다.
+- 외부 API를 부르지 않고, 옷 이름은 로그에 남기지 않습니다.
 
 ## 규칙 파일 구조
 
