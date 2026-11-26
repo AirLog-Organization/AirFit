@@ -42,3 +42,27 @@ def test_does_not_call_external_apis(fake_upstream):
     _post({"name": "레인부츠"}, path="/api/wardrobe/classify")
 
     assert calls == []
+
+
+def test_uses_llm_result_when_available(monkeypatch):
+    from airfit import llm_classify
+
+    llm = {"category": "shoes", "thickness": "medium", "waterproof": True}
+    monkeypatch.setattr(llm_classify, "classify", lambda name: llm)
+
+    status, body = _post({"name": "장마철 신발"}, path="/api/wardrobe/classify")
+
+    assert status == 200
+    assert body == {**llm, "source": "llm"}
+
+
+def test_falls_back_to_rules_when_llm_fails(monkeypatch):
+    from airfit import llm_classify
+
+    monkeypatch.setattr(llm_classify, "classify", lambda name: None)
+
+    status, body = _post({"name": "롱패딩"}, path="/api/wardrobe/classify")
+
+    assert status == 200
+    assert body["source"] == "rules"
+    assert body["category"] == "outer"

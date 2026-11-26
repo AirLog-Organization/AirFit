@@ -5,7 +5,7 @@ import binascii
 import json
 import logging
 
-from airfit import cache, classify, kakao, outfit
+from airfit import cache, classify, kakao, llm_classify, outfit
 from airfit.conditions import AllSourcesFailed, get_conditions
 from airfit.upstream import UpstreamError
 
@@ -137,7 +137,10 @@ def _wardrobe_classify(event: dict) -> dict:
         return _error(
             400, "invalid_params", f"name은 1~{MAX_ITEM_NAME_LENGTH}자의 옷 이름이어야 합니다."
         )
-    # source는 추정 방법. 지금은 키워드 규칙(rules)뿐이다
+    # source는 추정 방법. LLM(Bedrock)을 먼저 쓰고, 꺼져 있거나 실패하면 키워드 규칙을 쓴다
+    result = llm_classify.classify(name)
+    if result is not None:
+        return _response(200, {**result, "source": "llm"})
     return _response(200, {**classify.classify(name), "source": "rules"})
 
 
