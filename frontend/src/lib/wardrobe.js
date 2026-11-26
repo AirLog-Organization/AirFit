@@ -61,3 +61,11 @@ export function removeItem(items, id) {
   save(next)
   return next
 }
+
+export function updateItem(items, id, { category, name, thickness, waterproof }) {
+  const next = items.map((item) =>
+    item.id === id ? { ...item, category, name: name.trim(), thickness, waterproof } : item,
+  )
+  save(next)
+  return next
+}

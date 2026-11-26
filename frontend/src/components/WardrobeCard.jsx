@@ -1,4 +1,4 @@
-import { Plus, Trash2 } from 'lucide-react'
+import { Check, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import {
   addItem,
@@ -8,6 +8,7 @@ import {
   removeItem,
   THICKNESSES,
   THICKNESS_LABELS,
+  updateItem,
 } from '../lib/wardrobe'
 import Card from './Card'
 
@@ -22,6 +23,7 @@ function WardrobeCard() {
   const [thickness, setThickness] = useState('medium')
   const [waterproof, setWaterproof] = useState(false)
   const [error, setError] = useState('')
+  const [editingId, setEditingId] = useState(null)
 
   function handleSubmit(event) {
     event.preventDefault()
@@ -29,10 +31,34 @@ function WardrobeCard() {
       setError('옷 이름을 적어 주세요.')
       return
     }
-    setItems(addItem(items, { category, name, thickness, waterproof }))
+    const fields = { category, name, thickness, waterproof }
+    if (editingId) {
+      setItems(updateItem(items, editingId, fields))
+    } else {
+      setItems(addItem(items, fields))
+    }
+    resetForm()
+  }
+
+  function resetForm() {
+    setEditingId(null)
     setName('')
     setWaterproof(false)
     setError('')
+  }
+
+  function startEdit(item) {
+    setEditingId(item.id)
+    setCategory(item.category)
+    setName(item.name)
+    setThickness(item.thickness)
+    setWaterproof(item.waterproof)
+    setError('')
+  }
+
+  function handleRemove(id) {
+    setItems(removeItem(items, id))
+    if (id === editingId) resetForm()
   }
 
   return (
@@ -80,9 +106,22 @@ function WardrobeCard() {
           type="submit"
           className="flex items-center gap-1 rounded-xl bg-sky-600 px-3 py-2 text-sm font-medium text-white hover:bg-sky-700"
         >
-          <Plus aria-hidden="true" className="size-4" />
-          추가
+          {editingId ? (
+            <Check aria-hidden="true" className="size-4" />
+          ) : (
+            <Plus aria-hidden="true" className="size-4" />
+          )}
+          {editingId ? '수정 완료' : '추가'}
         </button>
+        {editingId && (
+          <button
+            type="button"
+            onClick={resetForm}
+            className="rounded-xl border border-slate-300 px-3 py-2 text-sm hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-700"
+          >
+            취소
+          </button>
+        )}
       </form>
       {error && (
         <p role="alert" className="mt-2 text-sm text-rose-600 dark:text-rose-300">
@@ -117,14 +156,24 @@ function WardrobeCard() {
                           {item.waterproof && ' · 방수'}
                         </span>
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => setItems(removeItem(items, item.id))}
-                        aria-label={`${item.name} 삭제`}
-                        className="rounded-lg p-1 hover:bg-slate-200 dark:hover:bg-slate-600"
-                      >
-                        <Trash2 aria-hidden="true" className="size-4" />
-                      </button>
+                      <span className="flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => startEdit(item)}
+                          aria-label={`${item.name} 수정`}
+                          className="rounded-lg p-1 hover:bg-slate-200 dark:hover:bg-slate-600"
+                        >
+                          <Pencil aria-hidden="true" className="size-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemove(item.id)}
+                          aria-label={`${item.name} 삭제`}
+                          className="rounded-lg p-1 hover:bg-slate-200 dark:hover:bg-slate-600"
+                        >
+                          <Trash2 aria-hidden="true" className="size-4" />
+                        </button>
+                      </span>
                     </li>
                   ))}
                 </ul>

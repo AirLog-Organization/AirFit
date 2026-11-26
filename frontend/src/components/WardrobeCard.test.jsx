@@ -59,4 +59,70 @@ describe('WardrobeCard', () => {
     expect(screen.getByText('흰 셔츠')).toBeInTheDocument()
     expect(loadWardrobe().map((item) => item.id)).toEqual(['a2'])
   })
+
+  it('수정 버튼을 누르면 값이 폼에 채워지고, 수정 완료로 바뀐 값이 저장된다', async () => {
+    localStorage.setItem(
+      'airfit.wardrobe',
+      JSON.stringify([
+        { id: 'a1', category: 'top', name: '회색 니트', thickness: 'medium', waterproof: false },
+        { id: 'a2', category: 'top', name: '흰 셔츠', thickness: 'thin', waterproof: false },
+      ]),
+    )
+    const user = userEvent.setup()
+    render(<WardrobeCard />)
+
+    await user.click(screen.getByRole('button', { name: '회색 니트 수정' }))
+    expect(screen.getByLabelText('이름')).toHaveValue('회색 니트')
+    expect(screen.getByLabelText('두께')).toHaveValue('medium')
+
+    await user.clear(screen.getByLabelText('이름'))
+    await user.type(screen.getByLabelText('이름'), '검정 니트')
+    await user.selectOptions(screen.getByLabelText('두께'), 'thick')
+    await user.click(screen.getByRole('button', { name: '수정 완료' }))
+
+    expect(screen.getByText('검정 니트')).toBeInTheDocument()
+    expect(screen.queryByText('회색 니트')).not.toBeInTheDocument()
+    expect(loadWardrobe()).toMatchObject([
+      { id: 'a1', name: '검정 니트', thickness: 'thick' },
+      { id: 'a2', name: '흰 셔츠' },
+    ])
+    expect(screen.getByRole('button', { name: '추가' })).toBeInTheDocument()
+  })
+
+  it('수정 중에 취소하면 아무것도 바뀌지 않고 추가 모드로 돌아간다', async () => {
+    localStorage.setItem(
+      'airfit.wardrobe',
+      JSON.stringify([
+        { id: 'a1', category: 'top', name: '회색 니트', thickness: 'medium', waterproof: false },
+      ]),
+    )
+    const user = userEvent.setup()
+    render(<WardrobeCard />)
+
+    await user.click(screen.getByRole('button', { name: '회색 니트 수정' }))
+    await user.type(screen.getByLabelText('이름'), '123')
+    await user.click(screen.getByRole('button', { name: '취소' }))
+
+    expect(screen.getByLabelText('이름')).toHaveValue('')
+    expect(screen.getByRole('button', { name: '추가' })).toBeInTheDocument()
+    expect(loadWardrobe()).toMatchObject([{ id: 'a1', name: '회색 니트' }])
+  })
+
+  it('수정 중인 옷을 지우면 수정 모드가 끝난다', async () => {
+    localStorage.setItem(
+      'airfit.wardrobe',
+      JSON.stringify([
+        { id: 'a1', category: 'top', name: '회색 니트', thickness: 'medium', waterproof: false },
+      ]),
+    )
+    const user = userEvent.setup()
+    render(<WardrobeCard />)
+
+    await user.click(screen.getByRole('button', { name: '회색 니트 수정' }))
+    await user.click(screen.getByRole('button', { name: '회색 니트 삭제' }))
+
+    expect(screen.getByRole('button', { name: '추가' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '취소' })).not.toBeInTheDocument()
+    expect(loadWardrobe()).toEqual([])
+  })
 })

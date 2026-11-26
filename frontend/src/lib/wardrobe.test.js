@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { addItem, loadWardrobe, removeItem } from './wardrobe'
+import { addItem, loadWardrobe, removeItem, updateItem } from './wardrobe'
 
 const KNIT = { category: 'top', name: '회색 니트', thickness: 'medium', waterproof: false }
 const COAT = { category: 'outer', name: '방수 코트', thickness: 'thick', waterproof: true }
@@ -49,5 +49,15 @@ describe('wardrobe', () => {
       JSON.stringify([good, { id: 'a2', category: 'hat', name: '모자', thickness: 'thin', waterproof: false }]),
     )
     expect(loadWardrobe()).toEqual([good])
+  })
+
+  it('수정하면 id와 순서는 그대로 두고 값만 바꿔 저장한다', () => {
+    const items = addItem(addItem([], KNIT), COAT)
+    const edited = updateItem(items, items[0].id, { ...KNIT, name: ' 검정 니트 ', thickness: 'thick' })
+
+    expect(edited.map((item) => item.name)).toEqual(['검정 니트', '방수 코트'])
+    expect(edited[0]).toMatchObject({ id: items[0].id, thickness: 'thick' })
+    expect(edited[1]).toBe(items[1])
+    expect(loadWardrobe()).toEqual(edited)
   })
 })
