@@ -72,6 +72,12 @@ Resources:
             ApiId: !Ref HttpApi
             Path: /api/wardrobe/recommend
             Method: POST
+        WardrobeClassify:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/wardrobe/classify
+            Method: POST
 
   # 외부 API 응답 캐시. 이름을 비워 두면 airfit-backend-CacheTable-xxxx로 만들어져 실행 role 권한 범위에 들어간다
   CacheTable:
