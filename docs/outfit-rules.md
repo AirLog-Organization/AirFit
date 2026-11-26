@@ -41,17 +41,54 @@
 
 ## 옷장 추천
 
-사용자가 브라우저에 등록한 옷장에서 오늘 입을 옷을 고릅니다. 코드는 `outfit.recommend_from_wardrobe`이고, 옷장 추천 API(`/api/wardrobe/recommend`)에 연결할 예정입니다. 옷장은 서버에 저장하지 않습니다.
+사용자가 브라우저에 등록한 옷장에서 오늘 입을 옷을 고릅니다. 코드는 `outfit.recommend_from_wardrobe`이고, 옷장 추천 API(`POST /api/wardrobe/recommend`)로 호출합니다. 옷장은 추천을 요청할 때만 본문으로 보내고, 서버는 저장하지 않으며 요청 본문을 로그에 남기지 않습니다.
 
 옷 하나는 아래 값을 가집니다.
 
-| 필드 | 설명 |
-| --- | --- |
-| `id` | 옷장 항목 id. 추천 결과에 그대로 붙어 화면이 어떤 옷인지 알 수 있습니다 |
-| `category` | `outer`, `top`, `bottom`, `shoes`, `accessory` 중 하나 |
-| `name` | 사용자가 붙인 이름 |
-| `thickness` | `thin`, `medium`, `thick` 중 하나 |
-| `waterproof` | 방수 여부 |
+| 필드 | 설명 | 제한 |
+| --- | --- | --- |
+| `id` | 옷장 항목 id. 추천 결과에 그대로 붙어 화면이 어떤 옷인지 알 수 있습니다 | 문자열, 1~64자 |
+| `category` | `outer`, `top`, `bottom`, `shoes`, `accessory` 중 하나 | |
+| `name` | 사용자가 붙인 이름 | 앞뒤 공백을 뺀 1~50자 |
+| `thickness` | `thin`, `medium`, `thick` 중 하나 | |
+| `waterproof` | 방수 여부 | `true` 또는 `false` |
+
+### API
+
+```http
+POST /api/wardrobe/recommend
+Content-Type: application/json
+
+{
+  "lat": 37.6199,
+  "lon": 127.063,
+  "wardrobe": [
+    { "id": "w1", "category": "outer", "name": "바람막이", "thickness": "thin", "waterproof": true },
+    { "id": "w2", "category": "top", "name": "회색 니트", "thickness": "medium", "waterproof": false }
+  ]
+}
+```
+
+응답은 `/api/conditions`의 `outfit`과 같은 모양이고, 옷장에서 고른 옷에만 `id`가 붙습니다.
+
+```json
+{
+  "summary": "쌀쌀해요. 가벼운 재킷을 걸치세요.",
+  "items": [
+    { "id": "w1", "category": "outer", "name": "바람막이" },
+    { "id": "w2", "category": "top", "name": "회색 니트" },
+    { "category": "bottom", "name": "청바지" }
+  ],
+  "tips": []
+}
+```
+
+| 상태 | `error` | 언제 |
+| --- | --- | --- |
+| 400 | `invalid_params` | 본문이 JSON 객체가 아니거나 64KB를 넘음, 국내가 아닌 좌표, `wardrobe`가 목록이 아니거나 200벌을 넘음, 형식이 맞지 않는 옷이 하나라도 있음 |
+| 502 | `upstream_error` | 날씨를 받지 못해 추천할 수 없음 |
+
+좌표 범위와 오류 응답 모양(`{ "error", "message" }`)은 `/api/conditions`와 같습니다. 날씨와 대기질은 `/api/conditions`와 같은 캐시를 씁니다.
 
 ### 고르는 순서
 
@@ -61,7 +98,7 @@
 4. 신발과 소품, 팁에 딸린 소품(우산, 마스크)은 기본 옷차림을 그대로 씁니다.
 5. 비 소식이 있으면(앞으로 12시간 강수 확률 60% 이상, 또는 지금 비나 눈) 같은 두께 안에서 방수 겉옷을 먼저 고르고, 옷장에 방수 신발이 있으면 기본 신발 대신 넣습니다. 두께 순서보다 방수를 앞세우지는 않습니다.
 
-종류나 두께가 빠진 옷은 고르지 않습니다. 날씨 조회에 실패하면 결과는 `null`입니다.
+API는 형식이 맞지 않는 옷이 있으면 400으로 거절합니다. 함수(`recommend_from_wardrobe`)만 직접 부를 때는 종류나 두께가 빠진 옷을 고르지 않고 넘어가며, 날씨가 없으면 `None`을 돌려줍니다.
 
 ### 구간별 맞는 두께
 
