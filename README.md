@@ -104,7 +104,20 @@ AirFit은 아래 외부 서비스를 API로 호출만 하며, 해당 서비스�
 | 상표 | 카카오 상표는 서비스 특성을 설명하는 문구에만 쓸 수 있고, 쓸 때는 첨자 ®을 붙여야 합니다(운영 정책 제18조). 서비스 이름이나 로고, 아이콘에는 쓸 수 없습니다. AirFit은 Kakao와 제휴하거나 Kakao가 제공하는 서비스가 아닙니다 |
 | 캐시 | 사용자 경험 개선 목적으로만 허용되고, 캐시한 데이터는 최신으로 유지해야 합니다. AirFit은 검색 결과를 7일, 지역 이름을 30일 캐싱합니다 |
 
-이용 조건은 바뀔 수 있으니 [공공데이터포털](https://www.data.go.kr/), [OpenWeather](https://openweathermap.org/price), [Kakao Developers 쿼터](https://developers.kakao.com/docs/ko/getting-started/quota)와 [운영 정책](https://developers.kakao.com/terms/ko/site-policies)에서 최신 내용을 확인해 주세요.
+### Claude (Amazon Bedrock)
+
+옷장 등록 화면의 옷 분류에 씁니다. 데이터 출처가 아니라 AI 기능입니다.
+
+| 항목 | 내용 |
+| --- | --- |
+| 모델 | Claude Haiku 5.5 (`anthropic.claude-haiku-5-5`), Bedrock 서울 리전(ap-northeast-2) |
+| 보내는 데이터 | 사용자가 적은 옷 이름 하나. 위치나 옷장 목록은 보내지 않음 |
+| 켜고 끄기 | 배포 설정 `LlmClassify`. 기본값은 꺼짐(`disabled`)이고, 꺼져 있거나 호출이 실패하면 키워드 규칙으로 분류 |
+| 이용 조건 | Bedrock 콘솔에서 모델 사용 허가가 필요. 요금은 Bedrock 요금표를 따름 |
+
+자세한 동작은 [docs/outfit-rules.md](docs/outfit-rules.md)의 "옷 분류"에 있습니다.
+
+이용 조건은 바뀔 수 있으니 [공공데이터포털](https://www.data.go.kr/), [OpenWeather](https://openweathermap.org/price), [Kakao Developers 쿼터](https://developers.kakao.com/docs/ko/getting-started/quota)와 [운영 정책](https://developers.kakao.com/terms/ko/site-policies), [Amazon Bedrock 요금](https://aws.amazon.com/bedrock/pricing/)에서 최신 내용을 확인해 주세요.
 
 ## 기여
 
