@@ -1,1 +1,3 @@
 # Lambda 런타임 의존성. boto3는 Lambda Python 런타임에 기본으로 들어 있어 넣지 않는다.
+# Bedrock의 Claude 호출(옷 분류). bedrock extra가 AWS 인증용 botocore를 함께 설치한다
+anthropic[bedrock]==2.8.0
