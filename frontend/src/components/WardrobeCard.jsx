@@ -11,12 +11,13 @@ import {
   updateItem,
 } from '../lib/wardrobe'
 import Card from './Card'
+import WardrobeRecommend from './WardrobeRecommend'
 
 const NAME_MAX = 30
 const FIELD =
   'rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900'
 
-function WardrobeCard() {
+function WardrobeCard({ location }) {
   const [items, setItems] = useState(loadWardrobe)
   const [category, setCategory] = useState('top')
   const [name, setName] = useState('')
@@ -182,6 +183,8 @@ function WardrobeCard() {
           })}
         </div>
       )}
+
+      {items.length > 0 && <WardrobeRecommend location={location} items={items} />}
     </Card>
   )
 }
