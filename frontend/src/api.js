@@ -57,3 +57,8 @@ export async function searchRegions(q, signal) {
 export function recommendFromWardrobe({ lat, lon }, wardrobe, signal) {
   return postJson('/api/wardrobe/recommend', { lat, lon, wardrobe }, signal)
 }
+
+// 옷 이름만 보내 종류, 두께, 방수를 추정한다. 추정이라 화면에서 사용자가 고칠 수 있다
+export function classifyClothing(name, signal) {
+  return postJson('/api/wardrobe/classify', { name }, signal)
+}
