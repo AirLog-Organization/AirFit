@@ -57,6 +57,8 @@ jobs:
           "KakaoRestApiKey=$KAKAO_REST_API_KEY"
           "OpenWeatherApiKey=$OPENWEATHER_API_KEY"
           "AirKoreaServiceKey=$AIRKOREA_SERVICE_KEY"
+          "LlmClassify=enabled"
+          "LlmChat=enabled"
         env:
           KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
           OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
