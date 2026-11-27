@@ -1,7 +1,7 @@
-"""옷 이름을 Amazon Bedrock의 Claude로 분류한다. 실패하면 None을 돌려주고, 호출하는 쪽이 키워드
+"""옷 이름을 Anthropic API의 Claude로 분류한다. 실패하면 None을 돌려주고, 호출하는 쪽이 키워드
 규칙(classify.py)으로 대신한다.
 
-LLM_CLASSIFY가 "enabled"일 때만 부른다. Bedrock 콘솔에서 모델 사용이 허가되기 전에는 꺼 둔다.
+LLM_CLASSIFY가 "enabled"이고 API 키가 있을 때만 부른다.
 옷 이름은 사용자 입력이라 로그에 남기지 않는다.
 """
 
@@ -9,7 +9,7 @@ import json
 import logging
 import os
 
-from airfit import bedrock
+from airfit import claude_api
 from airfit.outfit import CATEGORIES, THICKNESSES
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ SCHEMA = {
 
 
 def enabled() -> bool:
-    return os.environ.get("LLM_CLASSIFY") == "enabled"
+    return os.environ.get("LLM_CLASSIFY") == "enabled" and claude_api.configured()
 
 
 def _valid(result) -> bool:
@@ -60,8 +60,8 @@ def classify(name: str, client=None) -> dict | None:
     if client is None and not enabled():
         return None
     try:
-        response = (client or bedrock.client()).messages.create(
-            model=bedrock.model(),
+        response = (client or claude_api.client()).messages.create(
+            model=claude_api.model(),
             max_tokens=MAX_TOKENS,
             system=SYSTEM,
             messages=[{"role": "user", "content": name.strip()}],
@@ -79,7 +79,7 @@ def classify(name: str, client=None) -> dict | None:
     if response.stop_reason != "end_turn":
         logger.warning("LLM 분류가 끝나지 않음: %s", response.stop_reason)
         return None
-    text = bedrock.text_of(response)
+    text = claude_api.text_of(response)
     try:
         result = json.loads(text) if text else None
     except ValueError:

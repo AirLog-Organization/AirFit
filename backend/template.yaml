@@ -16,13 +16,17 @@ Parameters:
     Type: String
     NoEcho: true
     Default: ""
-  # 옷 분류에 Bedrock의 Claude를 쓸지. Bedrock 콘솔에서 모델 사용이 허가된 뒤 enabled로 바꾼다.
-  # disabled면 키워드 규칙만 쓴다
+  # Anthropic API 키(옷 분류, 챗봇의 Claude 호출). 비어 있으면 LLM을 켜 두어도 규칙으로 답한다
+  AnthropicApiKey:
+    Type: String
+    NoEcho: true
+    Default: ""
+  # 옷 분류에 Claude를 쓸지. disabled면 키워드 규칙만 쓴다
   LlmClassify:
     Type: String
     AllowedValues: [enabled, disabled]
     Default: disabled
-  # 챗봇에 Bedrock의 Claude를 쓸지. disabled면 오늘 옷차림을 요약한 규칙 기반 답을 준다
+  # 챗봇에 Claude를 쓸지. disabled면 오늘 옷차림을 요약한 규칙 기반 답을 준다
   LlmChat:
     Type: String
     AllowedValues: [enabled, disabled]
@@ -32,7 +36,9 @@ Globals:
   Function:
     Runtime: python3.14
     Architectures: [arm64]
-    MemorySize: 256
+    # Lambda는 메모리에 비례해 CPU를 받는다. Anthropic SDK를 시작 단계에서 불러오는 데
+    # 256MB(약 1/7 vCPU)로는 수 초가 넘게 걸려 1024MB로 올렸다
+    MemorySize: 1024
     Timeout: 10
 
 Resources:
@@ -61,14 +67,10 @@ Resources:
           CACHE_TABLE: !Ref CacheTable
           LLM_CLASSIFY: !Ref LlmClassify
           LLM_CHAT: !Ref LlmChat
+          ANTHROPIC_API_KEY: !Ref AnthropicApiKey
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CacheTable
-        # Bedrock의 Claude 호출 (Messages API 엔드포인트). 문서에 모델 ARN 형식이 없어 리소스를 좁히지 못했다
-        - Statement:
-            - Effect: Allow
-              Action: bedrock-mantle:CreateInference
-              Resource: "*"
       Events:
         Health:
           Type: HttpApi

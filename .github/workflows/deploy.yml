@@ -57,12 +57,15 @@ jobs:
           "KakaoRestApiKey=$KAKAO_REST_API_KEY"
           "OpenWeatherApiKey=$OPENWEATHER_API_KEY"
           "AirKoreaServiceKey=$AIRKOREA_SERVICE_KEY"
-          "LlmClassify=disabled"
-          "LlmChat=disabled"
+          "AnthropicApiKey=$ANTHROPIC_API_KEY"
+          "LlmClassify=enabled"
+          "LlmChat=enabled"
         env:
           KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
           OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
           AIRKOREA_SERVICE_KEY: ${{ secrets.AIRKOREA_SERVICE_KEY }}
+          # 비어 있으면 LLM을 켜 두어도 규칙으로 답한다
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
       - name: Smoke test
         run: |
@@ -70,3 +73,9 @@ jobs:
             --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text)
           curl -fsS "$api_url/api/health"
           curl -fsS "$api_url/api/regions?q=%EC%84%9C%EC%9A%B8" > /dev/null
+          # LLM이 실패해도 규칙으로 답해야 하므로, 500이나 제한 시간 초과가 나면 배포를 실패로 본다
+          curl -fsS --max-time 15 -X POST "$api_url/api/wardrobe/classify" \
+            -H 'content-type: application/json' -d '{"name": "rain boots"}'
+          curl -fsS --max-time 15 -X POST "$api_url/api/chat" \
+            -H 'content-type: application/json' \
+            -d '{"lat": 37.5665, "lon": 126.978, "message": "What should I wear today?"}'

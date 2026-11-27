@@ -1,13 +1,13 @@
-"""챗봇 질문에 Amazon Bedrock의 Claude로 답한다. 실패하면 None을 돌려주고, 호출하는 쪽이 규칙 기반
+"""챗봇 질문에 Anthropic API의 Claude로 답한다. 실패하면 None을 돌려주고, 호출하는 쪽이 규칙 기반
 답(chat.rule_answer)으로 대신한다.
 
-LLM_CHAT이 "enabled"일 때만 부른다. 질문은 사용자 입력이라 로그에 남기지 않는다.
+LLM_CHAT이 "enabled"이고 API 키가 있을 때만 부른다. 질문은 사용자 입력이라 로그에 남기지 않는다.
 """
 
 import logging
 import os
 
-from airfit import bedrock, chat
+from airfit import chat, claude_api
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ SYSTEM = """당신은 날씨와 미세먼지를 바탕으로 옷차림과 외출
 
 
 def enabled() -> bool:
-    return os.environ.get("LLM_CHAT") == "enabled"
+    return os.environ.get("LLM_CHAT") == "enabled" and claude_api.configured()
 
 
 def answer(question: str, conditions: dict, client=None) -> str | None:
@@ -34,8 +34,8 @@ def answer(question: str, conditions: dict, client=None) -> str | None:
     if client is None and not enabled():
         return None
     try:
-        response = (client or bedrock.client()).messages.create(
-            model=bedrock.model(),
+        response = (client or claude_api.client()).messages.create(
+            model=claude_api.model(),
             max_tokens=MAX_TOKENS,
             system=f"{SYSTEM}\n\n오늘 정보:\n{chat.context(conditions)}",
             messages=[{"role": "user", "content": question.strip()}],
@@ -50,7 +50,7 @@ def answer(question: str, conditions: dict, client=None) -> str | None:
     if response.stop_reason != "end_turn":
         logger.warning("LLM 챗봇 답이 끝나지 않음: %s", response.stop_reason)
         return None
-    text = (bedrock.text_of(response) or "").strip()
+    text = (claude_api.text_of(response) or "").strip()
     if not text or len(text) > MAX_ANSWER_CHARS:
         logger.warning("LLM 챗봇 답 길이가 맞지 않음: %d자", len(text))
         return None
