@@ -13,6 +13,10 @@
 | 옷차림 추천 | 기온, 체감온도, 강수, 미세먼지 기반 규칙(JSON) 추천 | 2단계 |
 | 시간대별 그래프, 다크 모드 | | 2단계 |
 | 옷장 등록과 코디 추천 | 옷장은 브라우저에만 저장하고 서버에 저장하지 않음 | 3단계 |
+| 옷 자동 분류 | 옷 이름으로 종류, 두께, 방수 여부를 추정해 등록 화면에 미리 채움 (Claude, 실패 시 키워드 규칙) | 도전 |
+| 챗봇 | 오늘 날씨와 옷차림 질문에 짧게 답함 (Claude, 실패 시 규칙 기반 요약) | 도전 |
+
+API는 [docs/api.md](docs/api.md), 버전별 변경 기록은 [CHANGELOG.md](CHANGELOG.md)에 있습니다.
 
 ## 구조
 
@@ -22,7 +26,7 @@
 | --- | --- |
 | `backend/` | AWS Lambda(Python 3.14) API와 SAM 템플릿 |
 | `frontend/` | React, Vite, Tailwind CSS 웹 앱 |
-| `docs/` | API 명세와 생활지수 기준 |
+| `docs/` | API 명세, 생활지수와 옷차림 기준, 외부 API, 챗봇 ([목록](docs/README.md)) |
 | `infra/` | GitHub Actions 배포용 IAM(OIDC) 템플릿 |
 | `licenses/` | 서드파티 라이선스 원문 |
 
