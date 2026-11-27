@@ -2,6 +2,12 @@
 
 AirFit의 버전별 변경 기록입니다. 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를, 버전 번호는 [Semantic Versioning](https://semver.org/lang/ko/)을 따릅니다.
 
+## [1.0.1] - 2026-11-27
+
+### 수정
+
+- 챗봇이 "우산 챙겨야 해?" 같은 질문에 "비 예보는 확인할 수 없어요"라고 답하던 문제. 앞으로 24시간 예보(3시간 간격)의 시각, 기온, 강수 확률을 챗봇에 함께 넘김 (#58)
+
 ## [1.0.0] - 2026-11-27
 
 첫 공개 버전입니다. 제안서의 필수, 추가, 도전 기능을 모두 담아 AWS에 배포했습니다.
@@ -57,4 +63,5 @@ AirFit의 버전별 변경 기록입니다. 형식은 [Keep a Changelog](https:/
 - 옷장, 챗봇 화면 리뷰 사항 반영: 429 안내 문구, 사용자가 고른 값 유지, 위치 변경 시 지난 결과 정리 (#52)
 - Anthropic API 키가 없을 때 배포가 실패하던 문제 (#56)
 
+[1.0.1]: https://github.com/AirLog-Organization/AirFit/releases/tag/v1.0.1
 [1.0.0]: https://github.com/AirLog-Organization/AirFit/releases/tag/v1.0.0
