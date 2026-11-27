@@ -204,4 +204,20 @@ describe('WardrobeCard 이름으로 미리 채우기', () => {
     expect(screen.getByLabelText('두께')).toHaveValue('medium')
     expect(screen.queryByText(/이름으로 추정해 채웠어요/)).not.toBeInTheDocument()
   })
+
+  it('사용자가 먼저 고른 종류와 두께는 추정값으로 덮어쓰지 않는다', async () => {
+    mockClassify(jsonResponse({ category: 'outer', thickness: 'thick', waterproof: true, source: 'rules' }))
+    const user = userEvent.setup()
+    render(<WardrobeCard />)
+
+    await user.selectOptions(screen.getByLabelText('종류'), 'bottom')
+    await user.selectOptions(screen.getByLabelText('두께'), 'thin')
+    await user.type(screen.getByLabelText('이름'), '방수 바지')
+    await user.tab()
+    await screen.findByText(/이름으로 추정해 채웠어요/)
+
+    expect(screen.getByLabelText('종류')).toHaveValue('bottom')
+    expect(screen.getByLabelText('두께')).toHaveValue('thin')
+    expect(screen.getByLabelText('방수')).toBeChecked()
+  })
 })
