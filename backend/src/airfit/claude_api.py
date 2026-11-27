@@ -7,6 +7,10 @@ API 키는 ANTHROPIC_API_KEY 환경 변수로 받는다(배포 때 GitHub Secret
 import os
 from functools import cache
 
+# SDK는 불러오는 데 수 초가 걸린다. 요청 중에 불러오면 Lambda 제한 시간(10초)을 넘겨서,
+# 제한 시간에 들지 않는 Lambda 시작 단계(모듈을 처음 불러올 때)에서 미리 불러 둔다
+from anthropic import Anthropic
+
 DEFAULT_MODEL = "claude-haiku-5-5"
 # Lambda 제한 시간(10초) 안에 규칙으로 대신할 여유를 남긴다
 TIMEOUT_SECONDS = 5.0
@@ -23,9 +27,6 @@ def model() -> str:
 
 @cache
 def client():
-    # 쓰지 않는 로컬과 테스트에서는 SDK를 불러오지 않는다
-    from anthropic import Anthropic
-
     # 키는 ANTHROPIC_API_KEY 환경 변수에서 읽는다
     return Anthropic(timeout=TIMEOUT_SECONDS, max_retries=0)
 

@@ -36,7 +36,9 @@ Globals:
   Function:
     Runtime: python3.14
     Architectures: [arm64]
-    MemorySize: 256
+    # Lambda는 메모리에 비례해 CPU를 받는다. Anthropic SDK를 시작 단계에서 불러오는 데
+    # 256MB(약 1/7 vCPU)로는 수 초가 넘게 걸려 1024MB로 올렸다
+    MemorySize: 1024
     Timeout: 10
 
 Resources:

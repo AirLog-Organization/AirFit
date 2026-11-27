@@ -44,3 +44,8 @@ def test_text_of_skips_thinking_blocks():
 
     assert claude_api.text_of(response) == "답"
     assert claude_api.text_of(SimpleNamespace(content=[])) is None
+
+
+def test_sdk_is_imported_when_the_module_loads():
+    # 요청 중에 SDK를 불러오면 Lambda 제한 시간을 넘기므로, 모듈을 불러올 때 이미 들어 있어야 한다
+    assert claude_api.Anthropic.__module__.startswith("anthropic")
