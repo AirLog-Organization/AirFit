@@ -5,7 +5,7 @@ import binascii
 import json
 import logging
 
-from airfit import cache, kakao, outfit
+from airfit import cache, classify, kakao, llm_classify, outfit
 from airfit.conditions import AllSourcesFailed, get_conditions
 from airfit.upstream import UpstreamError
 
@@ -128,6 +128,22 @@ def _wardrobe_recommend(event: dict) -> dict:
     return _response(200, result)
 
 
+def _wardrobe_classify(event: dict) -> dict:
+    body = _json_body(event)
+    if body is None:
+        return _error(400, "invalid_params", "요청 본문은 JSON 객체여야 합니다.")
+    name = body.get("name")
+    if not isinstance(name, str) or not 0 < len(name.strip()) <= MAX_ITEM_NAME_LENGTH:
+        return _error(
+            400, "invalid_params", f"name은 1~{MAX_ITEM_NAME_LENGTH}자의 옷 이름이어야 합니다."
+        )
+    # source는 추정 방법. LLM(Bedrock)을 먼저 쓰고, 꺼져 있거나 실패하면 키워드 규칙을 쓴다
+    result = llm_classify.classify(name)
+    if result is not None:
+        return _response(200, {**result, "source": "llm"})
+    return _response(200, {**classify.classify(name), "source": "rules"})
+
+
 def lambda_handler(event: dict, context) -> dict:
     method = event["requestContext"]["http"]["method"]
     path = event["rawPath"]
@@ -135,6 +151,8 @@ def lambda_handler(event: dict, context) -> dict:
 
     if method == "POST" and path == "/api/wardrobe/recommend":
         return _wardrobe_recommend(event)
+    if method == "POST" and path == "/api/wardrobe/classify":
+        return _wardrobe_classify(event)
     if method != "GET":
         return _error(404, "not_found", "없는 경로입니다.")
     if path == "/api/health":

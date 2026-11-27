@@ -16,6 +16,12 @@ Parameters:
     Type: String
     NoEcho: true
     Default: ""
+  # 옷 분류에 Bedrock의 Claude를 쓸지. Bedrock 콘솔에서 모델 사용이 허가된 뒤 enabled로 바꾼다.
+  # disabled면 키워드 규칙만 쓴다
+  LlmClassify:
+    Type: String
+    AllowedValues: [enabled, disabled]
+    Default: disabled
 
 Globals:
   Function:
@@ -44,9 +50,15 @@ Resources:
           OPENWEATHER_API_KEY: !Ref OpenWeatherApiKey
           AIRKOREA_SERVICE_KEY: !Ref AirKoreaServiceKey
           CACHE_TABLE: !Ref CacheTable
+          LLM_CLASSIFY: !Ref LlmClassify
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CacheTable
+        # Bedrock의 Claude 호출 (Messages API 엔드포인트). 문서에 모델 ARN 형식이 없어 리소스를 좁히지 못했다
+        - Statement:
+            - Effect: Allow
+              Action: bedrock-mantle:CreateInference
+              Resource: "*"
       Events:
         Health:
           Type: HttpApi
@@ -71,6 +83,12 @@ Resources:
           Properties:
             ApiId: !Ref HttpApi
             Path: /api/wardrobe/recommend
+            Method: POST
+        WardrobeClassify:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/wardrobe/classify
             Method: POST
 
   # 외부 API 응답 캐시. 이름을 비워 두면 airfit-backend-CacheTable-xxxx로 만들어져 실행 role 권한 범위에 들어간다

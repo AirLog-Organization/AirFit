@@ -53,7 +53,7 @@
 | `thickness` | `thin`, `medium`, `thick` 중 하나 | |
 | `waterproof` | 방수 여부 | `true` 또는 `false` |
 
-### API
+### 추천 API
 
 ```http
 POST /api/wardrobe/recommend
@@ -116,6 +116,52 @@ API는 형식이 맞지 않는 옷이 있으면 400으로 거절합니다. 함�
 | 5도 미만 | thick | thick, medium | thick |
 
 기본 옷차림 표에 맞춰 팀이 정한 값입니다.
+
+## 옷 분류
+
+옷장 등록 화면에서 옷 이름을 적으면 종류, 두께, 방수 여부를 미리 채워 주기 위한 추정입니다. 이름만 보고 추정하므로 틀릴 수 있어서, 화면에서 사용자가 고칠 수 있어야 합니다.
+
+두 가지 방법을 차례로 씁니다.
+
+1. **LLM 분류** (`llm_classify.py`): Amazon Bedrock의 Claude Haiku 5.5(`anthropic.claude-haiku-5-5`)에 옷 이름만 보내고, 정해진 JSON 모양(종류, 두께, 방수 여부)으로만 답하게 합니다. 배포 설정 `LlmClassify`가 `enabled`일 때만 씁니다. 기본값은 `disabled`입니다.
+2. **키워드 규칙** (`classify.py`, [`wardrobe_classify.json`](../backend/src/airfit/rules/wardrobe_classify.json)): LLM이 꺼져 있거나, 호출이 실패하거나(5초 제한), 답이 정해진 모양이 아니거나, 모델이 답을 거절하면 씁니다.
+
+### 키워드 규칙
+
+이름의 공백을 지우고(예: "롱 패딩" → "롱패딩") 키워드가 들어 있는지 봅니다.
+
+| 값 | 방법 | 예 |
+| --- | --- | --- |
+| `category` | 종류별 키워드 중 **가장 긴 키워드**가 맞은 종류. 길이가 같으면 규칙 파일에 먼저 적은 종류(겉옷, 상의, 하의, 신발, 소품 순). 맞는 키워드가 없으면 `null` | "레인부츠"는 "레인"보다 긴 "레인부츠"가 맞아 신발, "후드집업"은 "후드"(상의)와 "집업"(겉옷)이 같은 길이라 겉옷 |
+| `thickness` | 두꺼움(`thick`), 얇음(`thin`) 키워드 중 더 긴 쪽. 길이가 같으면 두꺼움. 둘 다 없으면 `medium` | "기모 바지"는 thick, "반팔 티셔츠"는 thin, "회색 니트"는 medium |
+| `waterproof` | 방수 키워드("방수", "레인", "장화", "우비", "고어텍스")가 하나라도 있으면 `true` | "방수 바람막이", "레인부츠" |
+
+키워드 목록은 팀이 자주 쓰는 옷 이름으로 정했습니다. 빠진 이름이 있으면 규칙 파일에 추가해 주세요.
+
+### 분류 API
+
+```http
+POST /api/wardrobe/classify
+Content-Type: application/json
+
+{ "name": "롱패딩" }
+```
+
+```json
+{ "category": "outer", "thickness": "thick", "waterproof": false, "source": "rules" }
+```
+
+- `name`은 앞뒤 공백을 뺀 1~50자 문자열입니다. 아니면 400 `invalid_params`입니다.
+- `source`는 추정 방법입니다. LLM 분류면 `llm`, 키워드 규칙이면 `rules`입니다. 응답 모양은 같습니다.
+- LLM이 꺼져 있으면 외부 서비스를 부르지 않습니다. 켜져 있으면 옷 이름만 Bedrock으로 보냅니다. 어느 쪽이든 옷 이름은 로그에 남기지 않습니다.
+
+### LLM 분류 켜기
+
+1. Bedrock 콘솔(서울 리전)에서 Claude Haiku 5.5 모델 사용을 허가받습니다.
+2. `.github/workflows/deploy.yml` Deploy 단계의 `--parameter-overrides`에 `"LlmClassify=enabled"`를 추가합니다. 넣지 않으면 기본값 `disabled`로 배포됩니다. Lambda 실행 role에는 `bedrock-mantle:CreateInference` 권한이 이미 들어 있습니다.
+3. 다른 모델을 쓰려면 Lambda 환경 변수 `BEDROCK_MODEL_ID`를 바꿉니다.
+
+배포 후 `/api/wardrobe/classify` 응답의 `source`가 `llm`이면 켜진 것입니다. 계속 `rules`가 나오면 모델 허가나 권한을 확인해 주세요.
 
 ## 규칙 파일 구조
 
