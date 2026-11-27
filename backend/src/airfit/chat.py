@@ -1,7 +1,10 @@
-"""챗봇 답의 재료. /api/conditions 응답(지역, 날씨, 대기질, 생활지수, 옷차림)을 글로 요약한다.
+"""챗봇 답의 재료. /api/conditions 응답(지역, 날씨, 시간대별 예보, 대기질, 생활지수, 옷차림)을
+글로 요약한다.
 
 LLM(llm_chat.py)에 넘길 오늘 정보와, LLM을 쓸 수 없을 때 돌려줄 규칙 기반 답을 만든다.
 """
+
+from datetime import datetime
 
 AIR_GRADES = {1: "좋음", 2: "보통", 3: "나쁨", 4: "매우나쁨"}
 INDEX_NAMES = {"outing": "외출", "mask": "마스크", "ventilation": "환기", "laundry": "빨래"}
@@ -23,6 +26,19 @@ def _weather(weather: dict | None) -> str:
         f"바람 {_number(weather.get('windSpeed'), 'm/s')}, "
         f"최근 1시간 강수 {weather.get('precipitation') or 0}mm"
     )
+
+
+def _hourly(hourly: list | None) -> str:
+    # "우산 챙겨야 해?"에 답하려면 지금 강수량만으로는 부족해서 앞으로의 강수 확률을 넘긴다
+    if not hourly:
+        return "앞으로 24시간 예보: 정보 없음"
+    slots = []
+    for slot in hourly:
+        # 시각은 한국 시간(+09:00) ISO 형식이라 시만 뽑는다
+        hour = datetime.fromisoformat(slot["time"]).hour
+        pop = "정보 없음" if slot.get("pop") is None else f"{slot['pop']}%"
+        slots.append(f"{hour}시 {_number(slot.get('temp'), '°')} 강수 확률 {pop}")
+    return "앞으로 24시간 예보(3시간 간격): " + ", ".join(slots)
 
 
 def _air(air: dict | None) -> str:
@@ -61,6 +77,7 @@ def context(conditions: dict) -> str:
         [
             f"지역: {place}",
             _weather(conditions.get("weather")),
+            _hourly(conditions.get("hourly")),
             _air(conditions.get("air")),
             _indices(conditions.get("indices")),
             _outfit(conditions.get("outfit")),
