@@ -77,4 +77,15 @@ describe('ChatCard', () => {
 
     expect(fetchMock).not.toHaveBeenCalled()
   })
+
+  it('요청 제한(429)에 걸리면 한국어로 안내한다', async () => {
+    mockFetch(jsonResponse({ message: 'Too Many Requests' }, 429))
+    const user = userEvent.setup()
+    render(<ChatCard location={LOCATION} />)
+
+    await user.type(screen.getByLabelText('질문'), '오늘 뭐 입어?{Enter}')
+
+    expect(await screen.findByText(/요청이 몰려서 잠시 쉬고 있어요/)).toBeInTheDocument()
+    expect(screen.queryByText('Too Many Requests')).not.toBeInTheDocument()
+  })
 })
