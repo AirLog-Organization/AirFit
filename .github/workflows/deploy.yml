@@ -48,18 +48,24 @@ jobs:
         run: sam build
 
       - name: Deploy
-        run: >-
-          sam deploy
-          --no-confirm-changeset
-          --no-fail-on-empty-changeset
-          --role-arn "${{ vars.AWS_CFN_EXEC_ROLE_ARN }}"
-          --parameter-overrides   
-          "KakaoRestApiKey=$KAKAO_REST_API_KEY"
-          "OpenWeatherApiKey=$OPENWEATHER_API_KEY"
-          "AirKoreaServiceKey=$AIRKOREA_SERVICE_KEY"
-          "AnthropicApiKey=$ANTHROPIC_API_KEY"
-          "LlmClassify=enabled"
-          "LlmChat=enabled"
+        run: |
+          overrides=(
+            "KakaoRestApiKey=$KAKAO_REST_API_KEY"
+            "OpenWeatherApiKey=$OPENWEATHER_API_KEY"
+            "AirKoreaServiceKey=$AIRKOREA_SERVICE_KEY"
+            "LlmClassify=enabled"
+            "LlmChat=enabled"
+          )
+          # SAM은 빈 값("AnthropicApiKey=")을 형식 오류로 거부해서, 키가 있을 때만 넘긴다.
+          # 넘기지 않으면 템플릿 기본값(빈 문자열)이라 LLM을 켜 두어도 규칙으로 답한다
+          if [ -n "$ANTHROPIC_API_KEY" ]; then
+            overrides+=("AnthropicApiKey=$ANTHROPIC_API_KEY")
+          fi
+          sam deploy \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset \
+            --role-arn "${{ vars.AWS_CFN_EXEC_ROLE_ARN }}" \
+            --parameter-overrides "${overrides[@]}"
         env:
           KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
           OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
