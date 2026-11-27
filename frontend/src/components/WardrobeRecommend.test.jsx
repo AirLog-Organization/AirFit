@@ -77,4 +77,19 @@ describe('WardrobeRecommend', () => {
     rerender(<WardrobeRecommend location={LOCATION} items={ITEMS.slice(1)} />)
     expect(screen.queryByLabelText('옷장 추천')).not.toBeInTheDocument()
   })
+
+  it('추천을 받은 뒤 위치가 바뀌면 지난 결과를 숨긴다', async () => {
+    mockFetch(jsonResponse(RESULT))
+    const user = userEvent.setup()
+    const { rerender } = render(<WardrobeRecommend location={LOCATION} items={ITEMS} />)
+
+    await user.click(screen.getByRole('button', { name: '내 옷장에서 오늘 옷 고르기' }))
+    expect(await screen.findByLabelText('옷장 추천')).toBeInTheDocument()
+
+    rerender(<WardrobeRecommend location={{ ...LOCATION }} items={ITEMS} />)
+    expect(screen.getByLabelText('옷장 추천')).toBeInTheDocument()
+
+    rerender(<WardrobeRecommend location={{ lat: 35.1796, lon: 129.0756, source: 'region' }} items={ITEMS} />)
+    expect(screen.queryByLabelText('옷장 추천')).not.toBeInTheDocument()
+  })
 })

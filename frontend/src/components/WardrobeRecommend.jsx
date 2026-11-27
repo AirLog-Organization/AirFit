@@ -11,16 +11,20 @@ function WardrobeRecommend({ location, items }) {
   const [status, setStatus] = useState('idle')
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
-  const [requestedItems, setRequestedItems] = useState(null)
+  const [requested, setRequested] = useState(null)
 
-  // 추천을 받은 뒤 옷장이 바뀌면 그 결과는 지난 옷장 기준이라 숨긴다
-  const isCurrent = requestedItems === items
+  // 추천을 받은 뒤 옷장이나 위치가 바뀌면 그 결과는 지난 조건 기준이라 숨긴다
+  const isCurrent =
+    requested !== null &&
+    requested.items === items &&
+    requested.lat === location?.lat &&
+    requested.lon === location?.lon
   const ready = hasCoordinates(location)
 
   function handleRecommend() {
     setStatus('loading')
     setError('')
-    setRequestedItems(items)
+    setRequested({ items, lat: location.lat, lon: location.lon })
     recommendFromWardrobe(location, items)
       .then((body) => {
         setResult(body)

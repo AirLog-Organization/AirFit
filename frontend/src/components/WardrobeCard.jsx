@@ -29,6 +29,8 @@ function WardrobeCard({ location }) {
   const [guessNote, setGuessNote] = useState('')
   // 분류 답이 늦게 오면 그사이 바뀐 이름에 덮어쓰지 않도록 마지막으로 물어본 이름을 기억한다
   const askedName = useRef('')
+  // 사용자가 직접 고른 값은 추정값으로 덮어쓰지 않는다
+  const picked = useRef({})
 
   // 새 옷을 넣을 때만, 이름 칸을 벗어나면 이름으로 종류, 두께, 방수를 추정해 미리 채운다
   function guessFromName() {
@@ -38,9 +40,9 @@ function WardrobeCard({ location }) {
     classifyClothing(trimmed)
       .then((guess) => {
         if (askedName.current !== trimmed) return
-        if (guess.category) setCategory(guess.category)
-        setThickness(guess.thickness)
-        setWaterproof(guess.waterproof)
+        if (guess.category && !picked.current.category) setCategory(guess.category)
+        if (!picked.current.thickness) setThickness(guess.thickness)
+        if (!picked.current.waterproof) setWaterproof(guess.waterproof)
         setGuessNote('이름으로 추정해 채웠어요. 맞지 않으면 고쳐 주세요.')
       })
       .catch(() => {
@@ -67,6 +69,7 @@ function WardrobeCard({ location }) {
     setEditingId(null)
     setGuessNote('')
     askedName.current = ''
+    picked.current = {}
     setName('')
     setWaterproof(false)
     setError('')
@@ -92,7 +95,14 @@ function WardrobeCard({ location }) {
       <form onSubmit={handleSubmit} aria-label="옷 추가" className="flex flex-wrap items-end gap-2">
         <label className="flex flex-col gap-1 text-xs text-slate-500 dark:text-slate-400">
           종류
-          <select value={category} onChange={(e) => setCategory(e.target.value)} className={FIELD}>
+          <select
+            value={category}
+            onChange={(e) => {
+              picked.current.category = true
+              setCategory(e.target.value)
+            }}
+            className={FIELD}
+          >
             {CATEGORIES.map((value) => (
               <option key={value} value={value}>
                 {CATEGORY_LABELS[value]}
@@ -113,7 +123,14 @@ function WardrobeCard({ location }) {
         </label>
         <label className="flex flex-col gap-1 text-xs text-slate-500 dark:text-slate-400">
           두께
-          <select value={thickness} onChange={(e) => setThickness(e.target.value)} className={FIELD}>
+          <select
+            value={thickness}
+            onChange={(e) => {
+              picked.current.thickness = true
+              setThickness(e.target.value)
+            }}
+            className={FIELD}
+          >
             {THICKNESSES.map((value) => (
               <option key={value} value={value}>
                 {THICKNESS_LABELS[value]}
@@ -125,7 +142,10 @@ function WardrobeCard({ location }) {
           <input
             type="checkbox"
             checked={waterproof}
-            onChange={(e) => setWaterproof(e.target.checked)}
+            onChange={(e) => {
+              picked.current.waterproof = true
+              setWaterproof(e.target.checked)
+            }}
           />
           방수
         </label>

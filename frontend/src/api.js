@@ -9,6 +9,8 @@ export class ApiError extends Error {
 }
 
 const FALLBACK_MESSAGE = '정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.'
+// API Gateway가 요청 수 제한에 걸리면 영어 문구("Too Many Requests")로 답해서 한국어로 바꿔 보여 준다
+const TOO_MANY_MESSAGE = '요청이 몰려서 잠시 쉬고 있어요. 조금 뒤에 다시 시도해 주세요.'
 
 async function request(url, options) {
   let response
@@ -20,6 +22,9 @@ async function request(url, options) {
   }
 
   const body = await response.json().catch(() => null)
+  if (response.status === 429) {
+    throw new ApiError(429, 'too_many_requests', TOO_MANY_MESSAGE)
+  }
   if (!response.ok || body === null) {
     throw new ApiError(
       response.status,
