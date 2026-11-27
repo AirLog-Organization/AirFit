@@ -1,7 +1,8 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { loadWardrobe } from '../lib/wardrobe'
+import { jsonResponse } from '../test/fixtures'
 import WardrobeCard from './WardrobeCard'
 
 describe('WardrobeCard', () => {
@@ -124,5 +125,83 @@ describe('WardrobeCard', () => {
     expect(screen.getByRole('button', { name: '추가' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '취소' })).not.toBeInTheDocument()
     expect(loadWardrobe()).toEqual([])
+  })
+})
+
+describe('WardrobeCard 이름으로 미리 채우기', () => {
+  beforeEach(() => localStorage.clear())
+  afterEach(() => vi.unstubAllGlobals())
+
+  function mockClassify(response) {
+    const fetchMock = vi.fn(() => response)
+    vi.stubGlobal('fetch', fetchMock)
+    return fetchMock
+  }
+
+  it('이름 칸을 벗어나면 추정한 종류, 두께, 방수를 채우고 안내한다', async () => {
+    const fetchMock = mockClassify(
+      jsonResponse({ category: 'outer', thickness: 'thick', waterproof: true, source: 'rules' }),
+    )
+    const user = userEvent.setup()
+    render(<WardrobeCard />)
+
+    await user.type(screen.getByLabelText('이름'), ' 방수 롱패딩 ')
+    await user.tab()
+
+    const [url, options] = fetchMock.mock.calls[0]
+    expect(url).toBe('/api/wardrobe/classify')
+    expect(JSON.parse(options.body)).toEqual({ name: '방수 롱패딩' })
+    expect(await screen.findByText(/이름으로 추정해 채웠어요/)).toBeInTheDocument()
+    expect(screen.getByLabelText('종류')).toHaveValue('outer')
+    expect(screen.getByLabelText('두께')).toHaveValue('thick')
+    expect(screen.getByLabelText('방수')).toBeChecked()
+  })
+
+  it('종류를 모르면 종류는 그대로 두고, 추정한 값은 사용자가 고칠 수 있다', async () => {
+    mockClassify(jsonResponse({ category: null, thickness: 'thin', waterproof: false, source: 'rules' }))
+    const user = userEvent.setup()
+    render(<WardrobeCard />)
+
+    await user.type(screen.getByLabelText('이름'), '이상한 옷')
+    await user.tab()
+    await screen.findByText(/이름으로 추정해 채웠어요/)
+
+    expect(screen.getByLabelText('종류')).toHaveValue('top')
+    expect(screen.getByLabelText('두께')).toHaveValue('thin')
+    await user.selectOptions(screen.getByLabelText('두께'), 'medium')
+    expect(screen.getByLabelText('두께')).toHaveValue('medium')
+  })
+
+  it('수정 중이거나 이름이 비었으면 묻지 않는다', async () => {
+    localStorage.setItem(
+      'airfit.wardrobe',
+      JSON.stringify([
+        { id: 'a1', category: 'top', name: '회색 니트', thickness: 'medium', waterproof: false },
+      ]),
+    )
+    const fetchMock = mockClassify(jsonResponse({ category: 'outer', thickness: 'thick', waterproof: true }))
+    const user = userEvent.setup()
+    render(<WardrobeCard />)
+
+    await user.click(screen.getByLabelText('이름'))
+    await user.tab()
+    await user.click(screen.getByRole('button', { name: '회색 니트 수정' }))
+    await user.click(screen.getByLabelText('이름'))
+    await user.tab()
+
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('분류에 실패하면 아무것도 바꾸지 않는다', async () => {
+    mockClassify(jsonResponse({ error: 'invalid_params', message: '잘못된 이름' }, 400))
+    const user = userEvent.setup()
+    render(<WardrobeCard />)
+
+    await user.type(screen.getByLabelText('이름'), '롱패딩')
+    await user.tab()
+
+    expect(screen.getByLabelText('종류')).toHaveValue('top')
+    expect(screen.getByLabelText('두께')).toHaveValue('medium')
+    expect(screen.queryByText(/이름으로 추정해 채웠어요/)).not.toBeInTheDocument()
   })
 })
