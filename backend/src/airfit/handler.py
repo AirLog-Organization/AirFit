@@ -139,7 +139,7 @@ def _wardrobe_classify(event: dict) -> dict:
         return _error(
             400, "invalid_params", f"name은 1~{MAX_ITEM_NAME_LENGTH}자의 옷 이름이어야 합니다."
         )
-    # source는 추정 방법. LLM(Bedrock)을 먼저 쓰고, 꺼져 있거나 실패하면 키워드 규칙을 쓴다
+    # source는 추정 방법. LLM(Claude)을 먼저 쓰고, 꺼져 있거나 실패하면 키워드 규칙을 쓴다
     result = llm_classify.classify(name)
     if result is not None:
         return _response(200, {**result, "source": "llm"})
@@ -164,7 +164,7 @@ def _chat(event: dict) -> dict:
         conditions = get_conditions(*coordinates)
     except AllSourcesFailed:
         return _error(502, "upstream_error", "날씨와 대기질 정보를 잠시 불러오지 못했어요.")
-    # source는 답을 만든 방법. LLM(Bedrock)을 먼저 쓰고, 꺼져 있거나 실패하면 규칙 기반 요약을 쓴다
+    # source는 답을 만든 방법. LLM(Claude)을 먼저 쓰고, 꺼져 있거나 실패하면 규칙 기반 요약을 쓴다
     answer = llm_chat.answer(message, conditions)
     if answer is not None:
         return _response(200, {"answer": answer, "source": "llm"})

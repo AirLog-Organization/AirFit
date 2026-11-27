@@ -2,7 +2,7 @@ import logging
 
 import pytest
 
-from airfit import bedrock, llm_chat
+from airfit import claude_api, llm_chat
 from test_chat import _conditions
 from test_llm_classify import _client
 
@@ -15,7 +15,7 @@ def test_answers_with_todays_context():
 
     assert answer == "얇은 니트에 가벼운 재킷을 걸치세요."
     call = client.messages.calls[0]
-    assert call["model"] == bedrock.DEFAULT_MODEL
+    assert call["model"] == claude_api.DEFAULT_MODEL
     assert call["messages"] == [{"role": "user", "content": "오늘 뭐 입어?"}]
     assert call["system"].startswith(llm_chat.SYSTEM)
     assert "지역: 서울특별시 노원구 월계1동" in call["system"]
@@ -52,15 +52,25 @@ def test_call_failure_returns_none_without_logging_the_question(caplog):
 
 def test_disabled_by_default_and_never_builds_a_client(monkeypatch):
     monkeypatch.delenv("LLM_CHAT", raising=False)
-    monkeypatch.setattr(bedrock, "client", lambda: pytest.fail("must not build a client"))
+    monkeypatch.setattr(claude_api, "client", lambda: pytest.fail("must not build a client"))
 
     assert llm_chat.enabled() is False
     assert llm_chat.answer("질문", _conditions()) is None
 
 
-def test_enabled_uses_bedrock_client(monkeypatch):
+def test_enabled_uses_claude_client(monkeypatch):
     client = _client(text="우산을 챙기세요.")
     monkeypatch.setenv("LLM_CHAT", "enabled")
-    monkeypatch.setattr(bedrock, "client", lambda: client)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    monkeypatch.setattr(claude_api, "client", lambda: client)
 
     assert llm_chat.answer("비 와?", _conditions()) == "우산을 챙기세요."
+
+
+def test_enabled_without_api_key_stays_off(monkeypatch):
+    monkeypatch.setenv("LLM_CHAT", "enabled")
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.setattr(claude_api, "client", lambda: pytest.fail("must not build a client"))
+
+    assert llm_chat.enabled() is False
+    assert llm_chat.answer("질문", _conditions()) is None

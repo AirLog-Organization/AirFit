@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from airfit import bedrock, llm_classify
+from airfit import claude_api, llm_classify
 
 
 class FakeMessages:
@@ -39,19 +39,19 @@ def test_returns_classification_and_sends_schema():
         "waterproof": False,
     }
     call = client.messages.calls[0]
-    assert call["model"] == "anthropic.claude-haiku-5-5"
+    assert call["model"] == "claude-haiku-5-5"
     assert call["messages"] == [{"role": "user", "content": "롱패딩"}]
     assert call["output_config"]["format"]["schema"] == llm_classify.SCHEMA
     assert call["output_config"]["effort"] == "low"
 
 
 def test_model_can_be_overridden(monkeypatch):
-    monkeypatch.setenv("BEDROCK_MODEL_ID", "anthropic.claude-sonnet-5-5")
+    monkeypatch.setenv("CLAUDE_MODEL", "claude-sonnet-5-5")
     client = _client(text=_json())
 
     llm_classify.classify("코트", client=client)
 
-    assert client.messages.calls[0]["model"] == "anthropic.claude-sonnet-5-5"
+    assert client.messages.calls[0]["model"] == "claude-sonnet-5-5"
 
 
 def test_unknown_category_becomes_none():
@@ -95,16 +95,17 @@ def test_call_failure_returns_none_without_logging_the_name(caplog):
 
 def test_disabled_by_default_and_never_builds_a_client(monkeypatch):
     monkeypatch.delenv("LLM_CLASSIFY", raising=False)
-    monkeypatch.setattr(bedrock, "client", lambda: pytest.fail("must not build a client"))
+    monkeypatch.setattr(claude_api, "client", lambda: pytest.fail("must not build a client"))
 
     assert llm_classify.enabled() is False
     assert llm_classify.classify("코트") is None
 
 
-def test_enabled_uses_bedrock_client(monkeypatch):
+def test_enabled_uses_claude_client(monkeypatch):
     client = _client(text=_json())
     monkeypatch.setenv("LLM_CLASSIFY", "enabled")
-    monkeypatch.setattr(bedrock, "client", lambda: client)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    monkeypatch.setattr(claude_api, "client", lambda: client)
 
     assert llm_classify.classify("코트")["category"] == "outer"
     assert len(client.messages.calls) == 1
@@ -123,3 +124,12 @@ def test_schema_matches_wardrobe_values():
     }
     assert set(properties["thickness"]["enum"]) == {"thin", "medium", "thick"}
     assert llm_classify.SCHEMA["additionalProperties"] is False
+
+
+def test_enabled_without_api_key_stays_off(monkeypatch):
+    monkeypatch.setenv("LLM_CLASSIFY", "enabled")
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.setattr(claude_api, "client", lambda: pytest.fail("must not build a client"))
+
+    assert llm_classify.enabled() is False
+    assert llm_classify.classify("코트") is None
