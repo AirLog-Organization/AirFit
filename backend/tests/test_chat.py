@@ -12,15 +12,21 @@ WEATHER = {
     "precipitation": 0,
 }
 AIR = {"pm10": {"value": 78, "grade": 2}, "pm25": {"value": 40, "grade": 3}}
+HOURLY = [
+    {"time": "2026-11-27T18:00:00+09:00", "temp": 14.2, "pop": 10},
+    {"time": "2026-11-27T21:00:00+09:00", "temp": 11.6, "pop": 70},
+    {"time": "2026-11-28T00:00:00+09:00", "temp": 9.4, "pop": 0},
+]
 
 
-def _conditions(weather=WEATHER, air=AIR) -> dict:
+def _conditions(weather=WEATHER, air=AIR, hourly=HOURLY) -> dict:
     return {
         "location": {"fullName": "서울특별시 노원구 월계1동"},
         "weather": weather,
         "air": air,
-        "indices": calculate(weather, air, None),
-        "outfit": recommend(weather, air, None),
+        "hourly": hourly,
+        "indices": calculate(weather, air, hourly),
+        "outfit": recommend(weather, air, hourly),
     }
 
 
@@ -77,3 +83,20 @@ def test_rule_answer_without_weather():
     answer = chat.rule_answer(_conditions(weather=None))
 
     assert answer == "날씨 정보를 불러오지 못해 지금은 옷차림을 알려 드리기 어려워요."
+
+
+def test_context_includes_hourly_rain_chance():
+    text = chat.context(_conditions())
+
+    assert (
+        "앞으로 24시간 예보(3시간 간격): 18시 14° 강수 확률 10%, 21시 12° 강수 확률 70%, " in text
+    )
+    assert "0시 9° 강수 확률 0%" in text
+
+
+def test_context_marks_missing_hourly():
+    assert "앞으로 24시간 예보: 정보 없음" in chat.context(_conditions(hourly=None))
+    assert "앞으로 24시간 예보: 정보 없음" in chat.context(_conditions(hourly=[]))
+
+    text = chat.context(_conditions(hourly=[{**HOURLY[0], "pop": None}]))
+    assert "18시 14° 강수 확률 정보 없음" in text
