@@ -8,15 +8,12 @@ LLM_CLASSIFY가 "enabled"일 때만 부른다. Bedrock 콘솔에서 모델 사�
 import json
 import logging
 import os
-from functools import cache
 
+from airfit import bedrock
 from airfit.outfit import CATEGORIES, THICKNESSES
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL = "anthropic.claude-haiku-5-5"
-# Lambda 제한 시간(10초) 안에 규칙으로 대신할 여유를 남긴다
-TIMEOUT_SECONDS = 5.0
 MAX_TOKENS = 1024
 
 SYSTEM = (
@@ -48,15 +45,6 @@ def enabled() -> bool:
     return os.environ.get("LLM_CLASSIFY") == "enabled"
 
 
-@cache
-def _client():
-    # 쓰지 않는 로컬과 테스트에서는 SDK를 불러오지 않는다
-    from anthropic import AnthropicBedrockMantle
-
-    # 리전은 Lambda가 넣어 주는 AWS_REGION을 쓴다
-    return AnthropicBedrockMantle(timeout=TIMEOUT_SECONDS, max_retries=0)
-
-
 def _valid(result) -> bool:
     return (
         isinstance(result, dict)
@@ -72,8 +60,8 @@ def classify(name: str, client=None) -> dict | None:
     if client is None and not enabled():
         return None
     try:
-        response = (client or _client()).messages.create(
-            model=os.environ.get("BEDROCK_MODEL_ID", DEFAULT_MODEL),
+        response = (client or bedrock.client()).messages.create(
+            model=bedrock.model(),
             max_tokens=MAX_TOKENS,
             system=SYSTEM,
             messages=[{"role": "user", "content": name.strip()}],
@@ -91,7 +79,7 @@ def classify(name: str, client=None) -> dict | None:
     if response.stop_reason != "end_turn":
         logger.warning("LLM 분류가 끝나지 않음: %s", response.stop_reason)
         return None
-    text = next((block.text for block in response.content if block.type == "text"), None)
+    text = bedrock.text_of(response)
     try:
         result = json.loads(text) if text else None
     except ValueError:
