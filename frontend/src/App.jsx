@@ -219,7 +219,7 @@ function App() {
           </>
         )}
 
-        <WardrobeCard />
+        <WardrobeCard location={location} />
 
         {/* 이용 조건상 필수 출처 표기 (README의 데이터 출처와 이용 조건) */}
         <footer className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400">
